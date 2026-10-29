@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>會議資料庫</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root { --bg:#f7f5f0; --panel:#fff; --ink:#2b2b2b; --muted:#777; --accent:#8b5e34; --line:#e4dfd5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:"PingFang TC","Noto Sans TC",sans-serif; background:var(--bg); color:var(--ink); }
+  header { padding:14px 24px; background:var(--accent); color:#fff; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  header h1 { margin:0; font-size:20px; }
+  #q { flex:1; min-width:200px; padding:8px 12px; border:0; border-radius:6px; font-size:15px; }
+  .wrap { display:flex; height:calc(100vh - 60px); }
+  nav { width:280px; overflow:auto; border-right:1px solid var(--line); background:var(--panel); padding:12px; }
+  nav h3 { font-size:13px; color:var(--muted); margin:16px 6px 6px; }
+  nav a { display:block; padding:8px 10px; border-radius:6px; color:var(--ink); text-decoration:none; cursor:pointer; }
+  nav a:hover { background:#f1ece3; }
+  nav a.on { background:var(--accent); color:#fff; }
+  nav small { display:block; opacity:.7; font-size:12px; }
+  main { flex:1; overflow:auto; padding:28px 40px; }
+  .doc { background:var(--panel); padding:32px 40px; border-radius:10px; box-shadow:0 1px 3px #0001; max-width:900px; }
+  .doc h2 { margin-top:0; }
+  .meta { color:var(--muted); margin-bottom:20px; display:flex; gap:16px; }
+  .meta a { color:var(--accent); }
+  .body { white-space:pre-wrap; line-height:1.8; }
+  mark { background:#ffe58a; }
+  .hit { background:var(--panel); padding:14px 18px; border-radius:8px; margin-bottom:10px; cursor:pointer; max-width:900px; }
+  .hit:hover { outline:2px solid var(--accent); }
+  .hit p { margin:6px 0 0; color:#555; font-size:14px; }
+  .tag { font-size:12px; background:#fdf0dc; color:var(--accent); padding:2px 8px; border-radius:10px; margin-left:8px; }
+  @media (max-width:700px){ .wrap{flex-direction:column;height:auto} nav{width:100%;max-height:40vh} main{padding:16px} .doc{padding:20px} }
+</style>
+</head>
+<body>
+<header>
+  <h1>📚 會議資料庫</h1>
+  <input id="q" placeholder="搜尋所有會議記錄…（本頁內也可用 Ctrl+F）" autocomplete="off">
+</header>
+<div class="wrap">
+  <nav id="nav">載入中…</nav>
+  <main id="main"></main>
+</div>
+<script>
+let data = [], cur = null;
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// ===== 設定（部署時填入）=====
+const CLIENT_ID = '請貼上OAuth用戶端ID.apps.googleusercontent.com';
+const FOLDER_ID = '請貼上資料夾ID';
+// ============================
+const SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+let tokenClient;
+
+window.onload = () => {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID, scope: SCOPE,
+    callback: r => {
+      if (r.error) return needLogin('登入失敗：' + r.error);
+      sessionStorage.tok = JSON.stringify({ t: r.access_token, exp: Date.now() + (r.expires_in - 60) * 1000 });
+      load(r.access_token);
+    },
+  });
+  const saved = sessionStorage.tok && JSON.parse(sessionStorage.tok);
+  if (saved && saved.exp > Date.now()) load(saved.t); else needLogin();
+};
+
+function needLogin(msg = '') {
+  $('nav').innerHTML = '';
+  $('main').innerHTML = `<div class="doc"><h2>請先登入</h2><p>只有獲得授權的成員可以查看會議資料。</p>
+    <p style="color:#b00">${esc(msg)}</p><button id="login" style="padding:10px 20px;font-size:16px;cursor:pointer">使用 Google 帳號登入</button></div>`;
+  $('login').onclick = () => tokenClient.requestAccessToken();
+}
+
+async function api(url, tok) {
+  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + tok } });
+  if (r.status === 401) { sessionStorage.removeItem('tok'); throw new Error('登入已過期'); }
+  if (!r.ok) throw new Error(r.status === 404 ? '你沒有存取權限，請聯絡管理者' : 'HTTP ' + r.status);
+  return r;
+}
+
+async function load(tok) {
+  $('nav').textContent = '載入中…';
+  try {
+    const q = encodeURIComponent(`'${FOLDER_ID}' in parents and name='_index.json' and trashed=false`);
+    const list = await (await api(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`, tok)).json();
+    if (!list.files.length) throw new Error('找不到資料（你可能沒有權限，或索引尚未建立）');
+    data = await (await api(`https://www.googleapis.com/drive/v3/files/${list.files[0].id}?alt=media`, tok)).json();
+  } catch (e) { return needLogin(e.message); }
+  if (!data.length) { $('nav').textContent = '尚無資料'; return; }
+  // 預設開啟離今天最近的一場
+  const now = Date.now();
+  const nearest = data.reduce((a, b) =>
+    Math.abs(new Date(b.date) - now) < Math.abs(new Date(a.date) - now) ? b : a);
+  renderNav(); show(nearest.id);
+}
+
+function renderNav() {
+  let html = '', group = '';
+  data.forEach(m => {
+    const g = m.date.slice(0, 4) + ' 年 ' + +m.date.slice(5, 7) + ' 月';
+    if (g !== group) { html += `<h3>${g}</h3>`; group = g; }
+    html += `<a data-id="${m.id}" onclick="show('${m.id}')">${esc(m.title)}<small>${m.date}</small></a>`;
+  });
+  $('nav').innerHTML = html;
+}
+
+function show(id, kw) {
+  cur = data.find(m => m.id === id);
+  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.id === id));
+  let body = esc(cur.text || '（無文字內容）');
+  if (kw) body = body.replace(new RegExp(reEsc(esc(kw)), 'gi'), '<mark>$&</mark>');
+  $('main').innerHTML = `<div class="doc"><h2>${esc(cur.title)}</h2>
+    <div class="meta"><span>📅 ${cur.date}</span><a href="${cur.url}" target="_blank">查看原始 PDF ↗</a></div>
+    <div class="body">${body}</div></div>`;
+  $('main').scrollTop = 0;
+  const first = document.querySelector('mark');
+  if (first) first.scrollIntoView({ block: 'center' });
+}
+
+$('q').addEventListener('input', e => {
+  const kw = e.target.value.trim();
+  if (!kw) return show(cur.id);
+  const re = new RegExp(reEsc(kw), 'gi');
+  const hits = data.map(m => {
+    const all = (m.title + '\n' + m.text).match(re);
+    if (!all) return null;
+    const i = m.text.search(re);
+    const snip = i < 0 ? '' : m.text.slice(Math.max(0, i - 40), i + 60).replace(/\s+/g, ' ');
+    return { m, n: all.length, snip };
+  }).filter(Boolean);
+  const hl = s => esc(s).replace(new RegExp(reEsc(esc(kw)), 'gi'), '<mark>$&</mark>');
+  $('main').innerHTML = `<p>找到 ${hits.length} 份會議包含「${esc(kw)}」</p>` + hits.map(h =>
+    `<div class="hit" onclick="show('${h.m.id}', ${esc(JSON.stringify(kw))})">
+      <b>${hl(h.m.title)}</b><span class="tag">${h.m.date}</span><span class="tag">${h.n} 處</span>
+      <p>…${hl(h.snip)}…</p></div>`).join('');
+});
+</script>
+</body>
+</html>
