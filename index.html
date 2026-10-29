@@ -62,7 +62,9 @@ load();
 async function load() {
   $('nav').textContent = '載入中…';
   try {
-    const r = await fetch(API_URL);
+    // 優先讀 GitHub Pages 上的靜態副本（快），沒有才問 Apps Script
+    let r = await fetch('data/index.json', { cache: 'no-cache' }).catch(() => null);
+    if (!r || !r.ok) r = await fetch(API_URL);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     data = await r.json();
   } catch (e) { $('nav').textContent = '載入失敗：' + e.message; return; }
@@ -72,6 +74,7 @@ async function load() {
   const nearest = data.reduce((a, b) =>
     Math.abs(new Date(b.date) - now) < Math.abs(new Date(a.date) - now) ? b : a);
   renderNav(); show(nearest.id);
+  data.slice(0, 3).forEach(m => m.id !== nearest.id && setTimeout(() => getPdf(m.id), 3000)); // 預先載入最近幾份
 }
 
 function renderNav() {
@@ -89,15 +92,21 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
 const pdfCache = {};
 let renderToken = 0;
 
+const PDF_OPTS = { cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true,
+  standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/' };
+
 function getPdf(id) {
-  if (!pdfCache[id]) pdfCache[id] = fetch(API_URL + '?pdf=' + id)
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-    .then(b64 => {
-      if (b64.startsWith('ERR')) throw new Error(b64);
-      const bin = atob(b64), bytes = new Uint8Array(bin.length);
-      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-      return pdfjsLib.getDocument({ data: bytes, cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/', cMapPacked: true }).promise;
-    })
+  if (!pdfCache[id]) pdfCache[id] =
+    // 靜態檔支援分段下載：第一頁很快就能顯示
+    pdfjsLib.getDocument({ url: 'data/pdf/' + id + '.pdf', ...PDF_OPTS }).promise
+    .catch(() => fetch(API_URL + '?pdf=' + id)   // 尚未同步的新檔 → 改從 Apps Script 取
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(b64 => {
+        if (b64.startsWith('ERR')) throw new Error(b64);
+        const bin = atob(b64), bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return pdfjsLib.getDocument({ data: bytes, ...PDF_OPTS }).promise;
+      }))
     .catch(e => { delete pdfCache[id]; throw e; });
   return pdfCache[id];
 }
