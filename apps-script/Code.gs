@@ -11,7 +11,15 @@ const INDEX_NAME = '_index.json';
 const NAME_RE = /^(\d{4}-\d{2}-\d{2})_(.+)\.pdf$/i;
 
 /** 網站讀取資料的 API（公開） */
-function doGet() {
+function doGet(e) {
+  // ?pdf=檔案ID → 回傳該 PDF 的 base64（僅限索引內的檔案）
+  if (e && e.parameter.pdf) {
+    const id = e.parameter.pdf;
+    const f = findIndexFile_();
+    const ok = f && JSON.parse(f.getBlob().getDataAsString('UTF-8')).some(m => m.id === id);
+    const out = ok ? Utilities.base64Encode(DriveApp.getFileById(id).getBlob().getBytes()) : 'ERR 找不到檔案';
+    return ContentService.createTextOutput(out).setMimeType(ContentService.MimeType.TEXT);
+  }
   const f = findIndexFile_();
   return ContentService.createTextOutput(f ? f.getBlob().getDataAsString('UTF-8') : '[]')
     .setMimeType(ContentService.MimeType.JSON);

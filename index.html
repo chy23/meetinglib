@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>會議資料庫</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root { --bg:#f7f5f0; --panel:#fff; --ink:#2b2b2b; --muted:#777; --accent:#8b5e34; --line:#e4dfd5; }
   * { box-sizing:border-box; }
@@ -25,6 +27,11 @@
   .meta a { color:var(--accent); }
   .body { white-space:pre-wrap; line-height:1.8; }
   mark { background:#ffe58a; }
+  #pages { width:100%; }
+  .page { position:relative; margin:0 auto 16px; box-shadow:0 1px 4px #0003; background:#fff; }
+  .page canvas { display:block; }
+  .textLayer .kw { background:rgba(255,200,0,.45); }
+  .loading { color:var(--muted); }
   .hit { background:var(--panel); padding:14px 18px; border-radius:8px; margin-bottom:10px; cursor:pointer; max-width:900px; }
   .hit:hover { outline:2px solid var(--accent); }
   .hit p { margin:6px 0 0; color:#555; font-size:14px; }
@@ -77,17 +84,69 @@ function renderNav() {
   $('nav').innerHTML = html;
 }
 
-function show(id, kw) {
+const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+const pdfCache = {};
+let renderToken = 0;
+
+function getPdf(id) {
+  if (!pdfCache[id]) pdfCache[id] = fetch(API_URL + '?pdf=' + id)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(b64 => {
+      if (b64.startsWith('ERR')) throw new Error(b64);
+      const bin = atob(b64), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return pdfjsLib.getDocument({ data: bytes, cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/', cMapPacked: true }).promise;
+    })
+    .catch(e => { delete pdfCache[id]; throw e; });
+  return pdfCache[id];
+}
+
+async function show(id, kw) {
+  const token = ++renderToken;
   cur = data.find(m => m.id === id);
   document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.id === id));
-  let body = esc(cur.text || '（無文字內容）');
-  if (kw) body = body.replace(new RegExp(reEsc(esc(kw)), 'gi'), '<mark>$&</mark>');
   $('main').innerHTML = `<div class="doc"><h2>${esc(cur.title)}</h2>
-    <div class="meta"><span>📅 ${cur.date}</span><a href="${cur.url}" target="_blank">查看原始 PDF ↗</a></div>
-    <div class="body">${body}</div></div>`;
+    <div class="meta"><span>📅 ${cur.date}</span><a href="${cur.url}" target="_blank">在 Google 雲端開啟 ↗</a></div>
+    <div id="pages"><p class="loading">📄 正在載入原始文件…</p></div></div>`;
   $('main').scrollTop = 0;
-  const first = document.querySelector('mark');
-  if (first) first.scrollIntoView({ block: 'center' });
+  const box = $('pages');
+  try {
+    const pdf = await getPdf(id);
+    if (token !== renderToken) return;
+    box.innerHTML = '';
+    let firstHit = null;
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      if (token !== renderToken) return;
+      const base = page.getViewport({ scale: 1 });
+      const scale = box.clientWidth / base.width;
+      const vp = page.getViewport({ scale });
+      const dpr = window.devicePixelRatio || 1;
+      const wrap = document.createElement('div');
+      wrap.className = 'page';
+      wrap.style.width = vp.width + 'px'; wrap.style.height = vp.height + 'px';
+      wrap.style.setProperty('--scale-factor', scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = vp.width * dpr; canvas.height = vp.height * dpr;
+      canvas.style.width = vp.width + 'px'; canvas.style.height = vp.height + 'px';
+      const tl = document.createElement('div');
+      tl.className = 'textLayer';
+      wrap.append(canvas, tl);
+      box.append(wrap);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp, transform: [dpr, 0, 0, dpr, 0, 0] }).promise;
+      await pdfjsLib.renderTextLayer({ textContentSource: await page.getTextContent(), container: tl, viewport: vp }).promise;
+      if (kw && !firstHit) {
+        tl.querySelectorAll('span').forEach(sp => {
+          if (sp.textContent.toLowerCase().includes(kw.toLowerCase())) { sp.classList.add('kw'); firstHit = firstHit || sp; }
+        });
+        if (firstHit) firstHit.scrollIntoView({ block: 'center' });
+      }
+    }
+  } catch (e) {
+    if (token !== renderToken) return;
+    box.innerHTML = `<p class="loading">⚠️ 原始文件載入失敗（${esc(e.message)}），以下為擷取文字：</p><div class="body">${esc(cur.text || '')}</div>`;
+  }
 }
 
 $('q').addEventListener('input', e => {
