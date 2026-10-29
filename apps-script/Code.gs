@@ -24,14 +24,16 @@ function setup() {
   buildIndex();
 }
 
-/** 掃描資料夾，只對新增/修改過的 PDF 取出文字 */
+/** 掃描資料夾，只對新增/修改過的 PDF 取出文字（每處理完一份就存檔，超過 5 分鐘先停，下次排程接著做） */
 function buildIndex() {
+  const start = Date.now();
   const folder = DriveApp.getFolderById(FOLDER_ID);
   const old = {};
   const idx = findIndexFile_();
   if (idx) JSON.parse(idx.getBlob().getDataAsString('UTF-8')).forEach(m => (old[m.id] = m));
 
   const list = [];
+  const pending = [];
   const it = folder.getFilesByType(MimeType.PDF);
   while (it.hasNext()) {
     const file = it.next();
@@ -39,19 +41,33 @@ function buildIndex() {
     if (!m) { console.warn('檔名不符規則，略過：' + file.getName()); continue; }
     const updated = file.getLastUpdated().toISOString();
     const prev = old[file.getId()];
-    if (!prev) file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); // 讓「查看原始 PDF」人人可開
-    list.push({
-      id: file.getId(),
-      date: m[1],
-      title: m[2],
-      url: file.getUrl(),
-      updated,
-      text: prev && prev.updated === updated ? prev.text : extractText_(file),
-    });
+    const item = { id: file.getId(), date: m[1], title: m[2], url: file.getUrl(), updated: prev ? prev.updated : '', text: prev ? prev.text : '' };
+    list.push(item);
+    if (!prev || prev.updated !== updated) pending.push({ item, file });
   }
-  list.sort((a, b) => b.date.localeCompare(a.date));
 
-  const json = JSON.stringify(list);
+  for (const { item, file } of pending) {
+    if (Date.now() - start > 5 * 60 * 1000) { console.log('時間將到，剩餘檔案下次處理'); break; }
+    try {
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); // 讓「查看原始 PDF」人人可開
+    } catch (e) { console.warn('無法設定共用：' + e.message); }
+    try {
+      item.text = extractText_(file);
+      console.log('完成：' + file.getName());
+    } catch (e) {
+      item.text = '（此份文字擷取失敗，請點「查看原始 PDF」閱讀）';
+      console.warn('擷取失敗：' + file.getName() + ' → ' + e.message);
+    }
+    item.updated = file.getLastUpdated().toISOString();
+    save_(folder, list);
+  }
+  save_(folder, list);
+}
+
+function save_(folder, list) {
+  const done = list.slice().sort((a, b) => b.date.localeCompare(a.date));
+  const json = JSON.stringify(done);
+  const idx = findIndexFile_();
   if (idx) idx.setContent(json);
   else folder.createFile(INDEX_NAME, json, 'application/json');
 }
@@ -59,9 +75,8 @@ function buildIndex() {
 /** 轉成 Google 文件（含 OCR，掃描檔也適用）後取文字，再刪除暫存檔 */
 function extractText_(file) {
   const doc = Drive.Files.create(
-    { name: '_ocr_tmp', mimeType: MimeType.GOOGLE_DOCS },
-    file.getBlob(),
-    { ocrLanguage: 'zh-TW' }
+    { name: '_ocr_tmp', mimeType: 'application/vnd.google-apps.document' },
+    file.getBlob()
   );
   try {
     return DocumentApp.openById(doc.id).getBody().getText();
