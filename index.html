@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>會議資料庫</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root { --bg:#f7f5f0; --panel:#fff; --ink:#2b2b2b; --muted:#777; --accent:#8b5e34; --line:#e4dfd5; }
   * { box-sizing:border-box; }
@@ -48,48 +47,18 @@ const $ = id => document.getElementById(id);
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-// ===== 設定（部署時填入）=====
-const CLIENT_ID = '請貼上OAuth用戶端ID.apps.googleusercontent.com';
-const FOLDER_ID = '請貼上資料夾ID';
-// ============================
-const SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
-let tokenClient;
+// ===== 設定：貼上 Apps Script 網頁應用程式網址（結尾是 /exec）=====
+const API_URL = '請貼上AppsScript網址';
+// ==================================================================
 
-window.onload = () => {
-  tokenClient = google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID, scope: SCOPE,
-    callback: r => {
-      if (r.error) return needLogin('登入失敗：' + r.error);
-      sessionStorage.tok = JSON.stringify({ t: r.access_token, exp: Date.now() + (r.expires_in - 60) * 1000 });
-      load(r.access_token);
-    },
-  });
-  const saved = sessionStorage.tok && JSON.parse(sessionStorage.tok);
-  if (saved && saved.exp > Date.now()) load(saved.t); else needLogin();
-};
-
-function needLogin(msg = '') {
-  $('nav').innerHTML = '';
-  $('main').innerHTML = `<div class="doc"><h2>請先登入</h2><p>只有獲得授權的成員可以查看會議資料。</p>
-    <p style="color:#b00">${esc(msg)}</p><button id="login" style="padding:10px 20px;font-size:16px;cursor:pointer">使用 Google 帳號登入</button></div>`;
-  $('login').onclick = () => tokenClient.requestAccessToken();
-}
-
-async function api(url, tok) {
-  const r = await fetch(url, { headers: { Authorization: 'Bearer ' + tok } });
-  if (r.status === 401) { sessionStorage.removeItem('tok'); throw new Error('登入已過期'); }
-  if (!r.ok) throw new Error(r.status === 404 ? '你沒有存取權限，請聯絡管理者' : 'HTTP ' + r.status);
-  return r;
-}
-
-async function load(tok) {
+load();
+async function load() {
   $('nav').textContent = '載入中…';
   try {
-    const q = encodeURIComponent(`'${FOLDER_ID}' in parents and name='_index.json' and trashed=false`);
-    const list = await (await api(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`, tok)).json();
-    if (!list.files.length) throw new Error('找不到資料（你可能沒有權限，或索引尚未建立）');
-    data = await (await api(`https://www.googleapis.com/drive/v3/files/${list.files[0].id}?alt=media`, tok)).json();
-  } catch (e) { return needLogin(e.message); }
+    const r = await fetch(API_URL);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    data = await r.json();
+  } catch (e) { $('nav').textContent = '載入失敗：' + e.message; return; }
   if (!data.length) { $('nav').textContent = '尚無資料'; return; }
   // 預設開啟離今天最近的一場
   const now = Date.now();

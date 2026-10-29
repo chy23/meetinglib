@@ -4,10 +4,18 @@
  * 1. 把 FOLDER_ID 換成你的雲端資料夾 ID
  * 2. 在編輯器左側「服務」加入 Drive API (v3)
  * 3. 執行一次 setup()
+ * 4. 部署 → 網頁應用程式（執行身分：我；存取權：所有人），把 /exec 網址貼到 index.html
  */
 const FOLDER_ID = '請貼上資料夾ID';
 const INDEX_NAME = '_index.json';
 const NAME_RE = /^(\d{4}-\d{2}-\d{2})_(.+)\.pdf$/i;
+
+/** 網站讀取資料的 API（公開） */
+function doGet() {
+  const f = findIndexFile_();
+  return ContentService.createTextOutput(f ? f.getBlob().getDataAsString('UTF-8') : '[]')
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 /** 首次執行：建立索引 + 每小時自動檢查新檔 */
 function setup() {
@@ -31,6 +39,7 @@ function buildIndex() {
     if (!m) { console.warn('檔名不符規則，略過：' + file.getName()); continue; }
     const updated = file.getLastUpdated().toISOString();
     const prev = old[file.getId()];
+    if (!prev) file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW); // 讓「查看原始 PDF」人人可開
     list.push({
       id: file.getId(),
       date: m[1],
