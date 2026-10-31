@@ -8,7 +8,7 @@ IMG_BASE_DIR = os.path.join(ROOT, "images")
 os.makedirs(PDF_DIR, exist_ok=True)
 os.makedirs(IMG_BASE_DIR, exist_ok=True)
 
-KNOWN_DEPTS = ["教務處", "學務處", "總務處", "輔導處", "輔導室", "人事室", "會計室", "幼兒園"]
+KNOWN_DEPTS = ["教務處", "學務處", "總務處", "輔導處", "人事室", "會計室", "幼兒園"]
 
 def get(url):
     with urllib.request.urlopen(url, timeout=300) as r:
@@ -43,7 +43,7 @@ def enrich_meeting(m):
     tags = []
     for dept in KNOWN_DEPTS:
         if dept in text:
-            tags.append(dept.replace("輔導處", "輔導室"))
+            tags.append(dept)
     tags = list(dict.fromkeys(tags))
     
     # 學年度與週次
@@ -91,7 +91,7 @@ def enrich_meeting(m):
         elif in_dept:
             for dept in KNOWN_DEPTS:
                 if f"【{dept}】" in l or f"{dept}報告" in l:
-                    current_dept = dept.replace("輔導處", "輔導室")
+                    current_dept = dept
             if current_dept and re.match(r'^[一二三四五六七八九十]、', l):
                 clean = re.sub(r'^[一二三四五六七八九十]、\s*', '', l)
                 if len(clean) > 6 and not any(s["category"] == current_dept and len(s["text"]) > 0 for s in summary_items if s["category"] == current_dept):

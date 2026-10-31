@@ -656,7 +656,7 @@
       <div class="filter-pill" data-dept="教務處">教務處</div>
       <div class="filter-pill" data-dept="學務處">學務處</div>
       <div class="filter-pill" data-dept="總務處">總務處</div>
-      <div class="filter-pill" data-dept="輔導室">輔導室</div>
+      <div class="filter-pill" data-dept="輔導處">輔導處</div>
     </div>
     <div id="navList">載入中…</div>
   </nav>
@@ -770,7 +770,11 @@ function renderNav() {
   const listEl = $('navList');
   let filtered = data;
   if (currentDeptFilter) {
-    filtered = data.filter(m => (m.tags && m.tags.includes(currentDeptFilter)) || (m.text && m.text.includes(currentDeptFilter)));
+    const core = currentDeptFilter.replace(/(處|室)$/, '');
+    filtered = data.filter(m => 
+      (m.tags && m.tags.some(t => t.includes(core))) || 
+      (m.text && m.text.includes(core))
+    );
   }
 
   if (!filtered.length) {
@@ -936,33 +940,98 @@ async function show(id, kw = null, updateHash = true) {
   renderPdfMode(id, kw);
 }
 
-// 跳轉到特定處室（直接在原版 PDF 頁面中尋找該處室並平滑滾動，保留原始照片與表格！）
+// 跳轉到特定處室（直接在原版 PDF 頁面中尋找該處室並精準平滑滾動）
 async function jumpToDept(deptName) {
-  showToast(`正在定位 ${deptName} 所在頁面…`);
+  // 標準化處室名稱（校方編制為輔導處）
+  const deptNorm = deptName.replace(/室$/, '處');
+  const coreName = deptName.replace(/(處|室)$/, '');
+
+  showToast(`正在定位 ${deptNorm}…`);
   try {
+    // 若頁面尚未初始化完成，非同步等待最多 3 秒
+    let waitTries = 0;
+    while ((!window.currentPdf || !$('pages') || !$('pages').querySelector('.page')) && waitTries < 30) {
+      await new Promise(r => setTimeout(r, 100));
+      waitTries++;
+    }
+
     const pdf = window.currentPdf || await getPdf(cur.id);
     const wraps = $('pages').querySelectorAll('.page');
+    if (!wraps.length) {
+      showToast(`文件仍在載入中，請稍候重試`);
+      return;
+    }
+
+    let targetPage = -1;
+    let fallbackPage = -1;
+
     for (let n = 1; n <= pdf.numPages; n++) {
       const page = await pdf.getPage(n);
       const textContent = await page.getTextContent();
-      const hasDept = textContent.items.some(it => it.str.includes(deptName));
-      if (hasDept) {
-        const wrap = wraps[n - 1];
-        if (wrap) {
-          if (!wrap.dataset.done && window.pdfDrawPage) {
-            await window.pdfDrawPage(n, wrap);
-          }
-          wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          wrap.style.boxShadow = '0 0 0 4px var(--accent)';
-          setTimeout(() => wrap.style.boxShadow = '', 2000);
-          showToast(`✅ 已定位至第 ${n} 頁（${deptName}）`);
-          return;
+      const fullText = textContent.items.map(it => it.str).join('').replace(/\s+/g, '');
+
+      // 優先權 1：大標題特徵（如：【教務處】、【教務處、教務處報告、【輔導處】等）
+      const hasSectionHeader = fullText.includes('【' + deptNorm) ||
+                               fullText.includes('【' + coreName) ||
+                               fullText.includes(deptNorm + '報告') ||
+                               fullText.includes(coreName + '處報告') ||
+                               fullText.includes(coreName + '室報告');
+      if (hasSectionHeader) {
+        targetPage = n;
+        break;
+      }
+
+      // 優先權 2：備用匹配包含處室名稱的頁面
+      if (fallbackPage === -1 && (fullText.includes(deptNorm) || fullText.includes(coreName + '處') || fullText.includes(coreName + '室'))) {
+        fallbackPage = n;
+      }
+    }
+
+    const finalPage = targetPage !== -1 ? targetPage : fallbackPage;
+    if (finalPage === -1) {
+      showToast(`未在文件中找到 ${deptNorm} 專屬段落`);
+      return;
+    }
+
+    const wrap = wraps[finalPage - 1];
+    if (!wrap) return;
+
+    // 確保該頁 Canvas 與 TextLayer 已完整繪製
+    if (!wrap.dataset.done && window.pdfDrawPage) {
+      await window.pdfDrawPage(finalPage, wrap);
+    }
+
+    // 計算在 main 容器內的絕對精確滾動高度，防止頂部被導航列或外框切掉
+    const mainEl = $('main');
+    const mainRect = mainEl.getBoundingClientRect();
+    const wrapRect = wrap.getBoundingClientRect();
+    const scrollTarget = mainEl.scrollTop + (wrapRect.top - mainRect.top) - 16;
+    mainEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+
+    // 視覺動畫回饋：醒目發光外框提示
+    wrap.style.outline = '4px solid var(--accent)';
+    wrap.style.boxShadow = '0 0 0 6px rgba(46,92,138,0.25), 0 8px 30px rgba(0,0,0,0.15)';
+    wrap.style.transition = 'all 0.3s ease';
+    setTimeout(() => {
+      wrap.style.outline = 'none';
+      wrap.style.boxShadow = '';
+    }, 2800);
+
+    // 高亮 textLayer 裡面的處室標題文字
+    const tl = wrap.querySelector('.textLayer');
+    if (tl) {
+      const spans = tl.querySelectorAll('span');
+      for (const sp of spans) {
+        if (sp.textContent.includes(coreName)) {
+          sp.classList.add('kw');
+          break;
         }
       }
     }
-    showToast(`未在文件中找到 ${deptName} 專屬段落`);
+
+    showToast(`✅ 已定位至第 ${finalPage} 頁（${deptNorm}）`);
   } catch (e) {
-    showToast(`跳轉失敗：${e.message}`);
+    showToast(`定位失敗：${e.message}`);
   }
 }
 
