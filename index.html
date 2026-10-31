@@ -673,6 +673,223 @@
     color: #fff;
     border-color: var(--accent);
   }
+  .btn-link-action-primary {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border-color: #bcd4e6;
+    font-weight: 600;
+  }
+  .btn-link-action-primary:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* 連結詳細資料與原始出處彈出視窗 (Modal) */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.48);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+  }
+  .modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal-dialog {
+    background: #ffffff;
+    border-radius: var(--radius-lg, 16px);
+    max-width: 580px;
+    width: 100%;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+    border: 1px solid var(--line);
+    transform: scale(0.95) translateY(12px);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    overflow: hidden;
+  }
+  .modal-overlay.show .modal-dialog {
+    transform: scale(1) translateY(0);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-sub);
+  }
+  .modal-header-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-close-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .modal-close-btn:hover {
+    color: var(--ink);
+    background: var(--bg);
+  }
+  .modal-body {
+    padding: 18px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .modal-link-header {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .modal-link-icon {
+    font-size: 26px;
+    line-height: 1;
+    background: var(--bg);
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .modal-link-title-wrap {
+    flex: 1;
+  }
+  .modal-link-title {
+    margin: 0 0 6px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .modal-link-tags {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .modal-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .modal-section-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--ink-light);
+  }
+  .modal-context-box {
+    background: #fdfbf7;
+    border: 1px solid #ebd9c8;
+    border-left: 4px solid var(--accent);
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--ink);
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: inherit;
+    word-break: break-word;
+  }
+  .modal-url-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+  .modal-url-text {
+    font-size: 12.5px;
+    color: var(--muted);
+    word-break: break-all;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+  .btn-copy-url {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-copy-url:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 6px;
+    margin-top: 6px;
+    border-top: 1px solid var(--line);
+  }
+  .btn-modal-secondary {
+    background: var(--panel-sub);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-modal-secondary:hover {
+    background: var(--line-light);
+  }
+  .btn-modal-primary {
+    background: var(--accent);
+    border: 1px solid var(--accent);
+    color: #ffffff;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-modal-primary:hover {
+    background: var(--accent-dark);
+    box-shadow: 0 2px 8px rgba(29, 111, 165, 0.35);
+  }
 
   /* 處室段落導航條（支援智慧懸浮：往下滑隱藏、往上滑跳出） */
   .dept-jump-bar {
@@ -958,6 +1175,20 @@
   <main id="main">
     <div class="loading-msg">正在載入圖書館資料…</div>
   </main>
+</div>
+
+<!-- 連結與表單詳細資料與原始出處彈出視窗 -->
+<div class="modal-overlay" id="linkModal" onclick="handleModalBackdropClick(event)">
+  <div class="modal-dialog" id="linkModalDialog" role="dialog" aria-modal="true" aria-labelledby="linkModalTitle">
+    <div class="modal-header">
+      <div class="modal-header-title" id="linkModalTitle">
+        <span>🔗</span>
+        <span>本次會議各項連結與原始出處</span>
+      </div>
+      <button class="modal-close-btn" onclick="closeLinkModal()" aria-label="關閉視窗">✕</button>
+    </div>
+    <div class="modal-body" id="linkModalBody"></div>
+  </div>
 </div>
 
 <div id="toast"></div>
@@ -1249,8 +1480,8 @@ async function show(id, kw = null, updateHash = true) {
           <span class="links-toggle" id="linksHeaderToggle">${hasMany ? '展開全部 ▼' : '收合 ▲'}</span>
         </div>
         <div class="links-grid ${hasMany ? 'compact' : ''}" id="linksGrid">
-          ${cur.links.map(l => `
-            <div class="link-item">
+          ${cur.links.map((l, idx) => `
+            <div class="link-item" onclick="openLinkModal(${idx})" title="點擊彈出視窗查看原始資料及連結">
               <div class="link-item-top">
                 <span class="link-item-icon">${l.icon || '🔗'}</span>
                 <span class="link-item-title" title="${esc(l.title)}">${esc(l.title)}</span>
@@ -1261,8 +1492,8 @@ async function show(id, kw = null, updateHash = true) {
                   <span class="link-domain">${esc(l.domain)}</span>
                 </div>
                 <div class="link-actions">
-                  <button class="btn-link-action" data-url="${esc(l.url)}" onclick="copyUrl(this.dataset.url)" title="複製連結網址">📋 複製</button>
-                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="在新分頁開啟">開啟 ↗</a>
+                  <button class="btn-link-action" data-url="${esc(l.url)}" onclick="event.stopPropagation(); copyUrl(this.dataset.url)" title="複製連結網址">📋 複製</button>
+                  <button class="btn-link-action btn-link-action-primary" onclick="event.stopPropagation(); openLinkModal(${idx})" title="查看原始資料及連結">🔍 查看資料</button>
                 </div>
               </div>
             </div>
@@ -1560,6 +1791,107 @@ function copyUrl(url) {
     showToast('複製失敗，網址：' + url);
   });
 }
+
+// 提取連結於會議記錄全文中的原始出處段落
+function getLinkContext(url, meetingText) {
+  if (!meetingText) return '';
+  const lines = meetingText.split('\n').map(l => l.trim()).filter(Boolean);
+  
+  const cleanU = url.replace(/^[a-z]+:\/\/(www\.)?/, '').split('?')[0];
+  let matchIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].includes(url) || (cleanU.length > 8 && lines[i].includes(cleanU))) {
+      matchIdx = i;
+      break;
+    }
+  }
+  if (matchIdx === -1) return '';
+
+  // 往前回溯找到段落標題或前 2 行
+  let start = Math.max(0, matchIdx - 2);
+  for (let i = matchIdx; i >= Math.max(0, matchIdx - 5); i--) {
+    if (/^[【（(]?[一二三四五六七八九十\d]+[、.）)]|^【.+】/.test(lines[i])) {
+      start = i;
+      break;
+    }
+  }
+
+  // 往後取到下一個大標題或後 3 行
+  let end = Math.min(lines.length, matchIdx + 4);
+  for (let i = matchIdx + 1; i < Math.min(lines.length, matchIdx + 6); i++) {
+    if (/^[【（(]?[一二三四五六七八九十\d]+[、.）)]|^【.+】/.test(lines[i])) {
+      end = i;
+      break;
+    }
+  }
+
+  return lines.slice(start, end).join('\n');
+}
+
+// 開啟連結詳細資料彈出視窗（顯示原始資料及連結，不直接開啟外部網頁）
+function openLinkModal(idx) {
+  if (!cur || !cur.links || !cur.links[idx]) return;
+  const link = cur.links[idx];
+  const context = getLinkContext(link.url, cur.text);
+
+  const modalEl = $('linkModal');
+  const modalBody = $('linkModalBody');
+  if (!modalEl || !modalBody) return;
+
+  modalBody.innerHTML = `
+    <div class="modal-link-header">
+      <div class="modal-link-icon">${link.icon || '🔗'}</div>
+      <div class="modal-link-title-wrap">
+        <h3 class="modal-link-title">${esc(link.title)}</h3>
+        <div class="modal-link-tags">
+          <span class="link-cat-tag">${esc(link.category || '外部連結')}</span>
+          <span class="link-domain">${esc(link.domain)}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-label">📄 會議記錄原始資料出處與說明：</div>
+      <div class="modal-context-box">${context ? esc(context).replace(/\n/g, '<br>') : '（此連結出現於本次會議公文內文中，請參閱下方會議紀錄全文）'}</div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-section-label">🔗 原始連結網址：</div>
+      <div class="modal-url-box">
+        <span class="modal-url-text">${esc(link.url)}</span>
+        <button class="btn-copy-url" data-url="${esc(link.url)}" onclick="copyUrl(this.dataset.url)">📋 複製網址</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-modal-secondary" onclick="closeLinkModal()">✕ 關閉視窗</button>
+      <a class="btn-modal-primary" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
+        🌐 前往開啟連結 ↗
+      </a>
+    </div>
+  `;
+
+  modalEl.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLinkModal() {
+  const modalEl = $('linkModal');
+  if (modalEl) modalEl.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function handleModalBackdropClick(e) {
+  if (e.target && e.target.id === 'linkModal') {
+    closeLinkModal();
+  }
+}
+
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeLinkModal();
+  }
+});
 
 // 渲染 PDF 模式（Lazy loading + TextLayer 支援 Ctrl+F 與文字複製選取）
 async function renderPdfMode(id, kw) {
