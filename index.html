@@ -825,16 +825,50 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    background: var(--bg);
-    border: 1px solid var(--line);
+    background: #f0f6fa;
+    border: 1.5px solid #bcd4e6;
     padding: 8px 12px;
     border-radius: 8px;
+    transition: all 0.15s;
+  }
+  .modal-url-box:hover {
+    background: #e5f0f8;
+    border-color: var(--accent);
+  }
+  .modal-url-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    text-decoration: none;
+    color: var(--accent-dark);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .modal-url-link:hover .modal-url-text {
+    text-decoration: underline;
+    color: var(--accent);
   }
   .modal-url-text {
-    font-size: 12.5px;
-    color: var(--muted);
+    font-size: 13px;
+    color: var(--accent-dark);
     word-break: break-all;
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 600;
+  }
+  .modal-url-jump {
+    font-size: 11px;
+    background: var(--accent);
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-weight: 700;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    box-shadow: 0 1px 3px rgba(46,92,138,0.25);
   }
   .btn-copy-url {
     background: #fff;
@@ -1498,7 +1532,8 @@ async function show(id, kw = null, updateHash = true) {
                 </div>
                 <div class="link-actions">
                   <button class="btn-link-action" data-url="${esc(l.url)}" onclick="event.stopPropagation(); copyUrl(this.dataset.url)" title="複製連結網址">📋 複製</button>
-                  <button class="btn-link-action btn-link-action-primary" onclick="event.stopPropagation(); openLinkModal(${idx})" title="查看原始資料及連結">🔍 查看資料</button>
+                  <button class="btn-link-action btn-link-action-primary" onclick="event.stopPropagation(); openLinkModal(${idx})" title="查看原始資料及出處">📄 原始資料</button>
+                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" title="直接前往開啟連結">開啟 ↗</a>
                 </div>
               </div>
             </div>
@@ -1833,7 +1868,7 @@ function getLinkContext(url, meetingText) {
   return lines.slice(start, end).join('\n');
 }
 
-// 開啟連結詳細資料彈出視窗（顯示原始資料及連結，不直接開啟外部網頁）
+// 開啟連結詳細資料彈出視窗（顯示原始資料及連結，點擊連結直接跳轉）
 function openLinkModal(idx) {
   if (!cur || !cur.links || !cur.links[idx]) return;
   const link = cur.links[idx];
@@ -1843,11 +1878,25 @@ function openLinkModal(idx) {
   const modalBody = $('linkModalBody');
   if (!modalEl || !modalBody) return;
 
+  // 格式化出處文字中的 URL，使其直接可點擊跳轉
+  let contextHtml = '（此連結出現於本次會議公文內文中，請參閱下方會議紀錄全文）';
+  if (context) {
+    const escaped = esc(context);
+    contextHtml = escaped
+      .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:700;text-decoration:underline;">$1 ↗</a>')
+      .replace(/\n/g, '<br>');
+  }
+
   modalBody.innerHTML = `
     <div class="modal-link-header">
       <div class="modal-link-icon">${link.icon || '🔗'}</div>
       <div class="modal-link-title-wrap">
-        <h3 class="modal-link-title">${esc(link.title)}</h3>
+        <a href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit;" title="點擊直接前往此連結">
+          <h3 class="modal-link-title" style="display:flex;align-items:center;gap:6px;">
+            <span>${esc(link.title)}</span>
+            <span style="font-size:13px;color:var(--accent);font-weight:700;">↗</span>
+          </h3>
+        </a>
         <div class="modal-link-tags">
           <span class="link-cat-tag">${esc(link.category || '外部連結')}</span>
           <span class="link-domain">${esc(link.domain)}</span>
@@ -1857,14 +1906,17 @@ function openLinkModal(idx) {
 
     <div class="modal-section">
       <div class="modal-section-label">📄 會議記錄原始資料出處與說明：</div>
-      <div class="modal-context-box">${context ? esc(context).replace(/\n/g, '<br>') : '（此連結出現於本次會議公文內文中，請參閱下方會議紀錄全文）'}</div>
+      <div class="modal-context-box">${contextHtml}</div>
     </div>
 
     <div class="modal-section">
-      <div class="modal-section-label">🔗 原始連結網址：</div>
+      <div class="modal-section-label">🔗 原始連結網址（點擊直接跳轉）：</div>
       <div class="modal-url-box">
-        <span class="modal-url-text">${esc(link.url)}</span>
-        <button class="btn-copy-url" data-url="${esc(link.url)}" onclick="copyUrl(this.dataset.url)">📋 複製網址</button>
+        <a class="modal-url-link" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" title="直接點擊前往開啟連結">
+          <span class="modal-url-text">${esc(link.url)}</span>
+          <span class="modal-url-jump">開啟 ↗</span>
+        </a>
+        <button class="btn-copy-url" data-url="${esc(link.url)}" onclick="copyUrl(this.dataset.url)" title="複製此連結網址">📋 複製</button>
       </div>
     </div>
 
