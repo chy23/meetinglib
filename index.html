@@ -74,7 +74,7 @@ async function load() {
   const nearest = data.reduce((a, b) =>
     Math.abs(new Date(b.date) - now) < Math.abs(new Date(a.date) - now) ? b : a);
   renderNav(); show(nearest.id);
-  data.slice(0, 3).forEach(m => m.id !== nearest.id && setTimeout(() => getPdf(m.id), 3000)); // 預先載入最近幾份
+  data.slice(0, 2).forEach(m => m.id !== nearest.id && setTimeout(() => getPdf(m.id), 5000)); // 預先載入最近幾份
 }
 
 function renderNav() {
@@ -124,34 +124,45 @@ async function show(id, kw) {
     const pdf = await getPdf(id);
     if (token !== renderToken) return;
     box.innerHTML = '';
-    let firstHit = null;
-    for (let n = 1; n <= pdf.numPages; n++) {
+    // 先放好每頁的空白框，捲到附近才繪製（頁數多時不會卡住）
+    const draw = async (n, wrap) => {
+      if (wrap.dataset.done) return; wrap.dataset.done = 1;
       const page = await pdf.getPage(n);
-      if (token !== renderToken) return;
-      const base = page.getViewport({ scale: 1 });
-      const scale = box.clientWidth / base.width;
-      const vp = page.getViewport({ scale });
-      const dpr = window.devicePixelRatio || 1;
-      const wrap = document.createElement('div');
-      wrap.className = 'page';
-      wrap.style.width = vp.width + 'px'; wrap.style.height = vp.height + 'px';
-      wrap.style.setProperty('--scale-factor', scale);
+      const vp = page.getViewport({ scale: box.clientWidth / page.getViewport({ scale: 1 }).width });
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      wrap.style.setProperty('--scale-factor', vp.scale);
       const canvas = document.createElement('canvas');
       canvas.width = vp.width * dpr; canvas.height = vp.height * dpr;
       canvas.style.width = vp.width + 'px'; canvas.style.height = vp.height + 'px';
       const tl = document.createElement('div');
       tl.className = 'textLayer';
       wrap.append(canvas, tl);
-      box.append(wrap);
       await page.render({ canvasContext: canvas.getContext('2d'), viewport: vp, transform: [dpr, 0, 0, dpr, 0, 0] }).promise;
       await pdfjsLib.renderTextLayer({ textContentSource: await page.getTextContent(), container: tl, viewport: vp }).promise;
-      if (kw && !firstHit) {
-        tl.querySelectorAll('span').forEach(sp => {
-          if (sp.textContent.toLowerCase().includes(kw.toLowerCase())) { sp.classList.add('kw'); firstHit = firstHit || sp; }
-        });
-        if (firstHit) firstHit.scrollIntoView({ block: 'center' });
+      return tl;
+    };
+    const first = await pdf.getPage(1);
+    if (token !== renderToken) return;
+    const v1 = first.getViewport({ scale: 1 });
+    const h = box.clientWidth / v1.width * v1.height;
+    box.innerHTML = '';
+    const wraps = [];
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const w = document.createElement('div');
+      w.className = 'page'; w.style.width = box.clientWidth + 'px'; w.style.minHeight = h + 'px';
+      box.append(w); wraps.push(w);
+    }
+    const io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { io.unobserve(e.target); draw(wraps.indexOf(e.target) + 1, e.target); }
+    }), { root: $('main'), rootMargin: '1500px 0px' });
+    if (kw) {  // 搜尋跳轉：依序繪製直到找到關鍵字
+      for (let n = 1; n <= pdf.numPages && token === renderToken; n++) {
+        const tl = await draw(n, wraps[n - 1]);
+        const sp = tl && [...tl.querySelectorAll('span')].find(x => x.textContent.toLowerCase().includes(kw.toLowerCase()));
+        if (sp) { tl.querySelectorAll('span').forEach(x => x.textContent.toLowerCase().includes(kw.toLowerCase()) && x.classList.add('kw')); sp.scrollIntoView({ block: 'center' }); break; }
       }
     }
+    wraps.forEach(w => io.observe(w));
   } catch (e) {
     if (token !== renderToken) return;
     box.innerHTML = `<p class="loading">⚠️ 原始文件載入失敗（${esc(e.message)}），以下為擷取文字：</p><div class="body">${esc(cur.text || '')}</div>`;
