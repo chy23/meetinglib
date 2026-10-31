@@ -970,28 +970,38 @@ async function jumpToDept(deptName) {
       const textContent = await page.getTextContent();
       const fullText = textContent.items.map(it => it.str).join('').replace(/\s+/g, '');
 
-      // 優先權 1：大標題特徵（如：【教務處】、【教務處、教務處報告、【輔導處】等）
-      const hasSectionHeader = fullText.includes('【' + deptNorm) ||
-                               fullText.includes('【' + coreName) ||
-                               fullText.includes(deptNorm + '報告') ||
-                               fullText.includes(coreName + '處報告') ||
-                               fullText.includes(coreName + '室報告');
+      // 嚴格比對處室或其下轄組別之正式報告標題，避免隨意提及誤跳無關頁面
+      let hasSectionHeader = fullText.includes('【' + deptNorm) ||
+                             fullText.includes('【' + coreName + '處') ||
+                             fullText.includes('【' + coreName + '室') ||
+                             fullText.includes(deptNorm + '報告') ||
+                             fullText.includes(coreName + '處報告') ||
+                             fullText.includes(coreName + '室報告');
+
+      if (!hasSectionHeader) {
+        if (coreName === '總務') {
+          hasSectionHeader = fullText.includes('【出納組') || fullText.includes('【事務組') || fullText.includes('【文書組');
+        } else if (coreName === '教務') {
+          hasSectionHeader = fullText.includes('【教學組') || fullText.includes('【註冊組') || fullText.includes('【課程組') || fullText.includes('【資訊組') || fullText.includes('【設備組');
+        } else if (coreName === '學務') {
+          hasSectionHeader = fullText.includes('【生教組') || fullText.includes('【訓育組') || fullText.includes('【體育組') || fullText.includes('【衛生組');
+        } else if (coreName === '輔導') {
+          hasSectionHeader = fullText.includes('【輔導組') || fullText.includes('【特教組') || fullText.includes('【資料組');
+        }
+      }
+
       if (hasSectionHeader) {
         targetPage = n;
         break;
       }
-
-      // 優先權 2：備用匹配包含處室名稱的頁面
-      if (fallbackPage === -1 && (fullText.includes(deptNorm) || fullText.includes(coreName + '處') || fullText.includes(coreName + '室'))) {
-        fallbackPage = n;
-      }
     }
 
-    const finalPage = targetPage !== -1 ? targetPage : fallbackPage;
-    if (finalPage === -1) {
-      showToast(`未在文件中找到 ${deptNorm} 專屬段落`);
+    if (targetPage === -1) {
+      showToast(`ℹ️ 本次會議中 ${deptNorm} 無獨立報告段落（僅於內文提及）`);
       return;
     }
+
+    const finalPage = targetPage;
 
     const wrap = wraps[finalPage - 1];
     if (!wrap) return;

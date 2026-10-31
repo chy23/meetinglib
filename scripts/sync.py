@@ -39,10 +39,13 @@ def enrich_meeting(m):
     text = m.get("text", "")
     lines = [l.strip() for l in text.split("\n") if l.strip()]
     
-    # 處室標籤
+    # 處室標籤（僅當該處室確有獨立報告標題時才納入標籤，避免隨意提及誤判）
     tags = []
     for dept in KNOWN_DEPTS:
-        if dept in text:
+        pattern = r'【\s*' + re.escape(dept) + r'\s*】|' + re.escape(dept) + r'報告'
+        if dept == '總務處':
+            pattern += r'|【出納組】|【事務組】|【文書組】'
+        if re.search(pattern, text):
             tags.append(dept)
     tags = list(dict.fromkeys(tags))
     
