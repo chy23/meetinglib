@@ -109,9 +109,39 @@ def extract_clean_links(text):
             })
     return links
 
+COMMON_SURNAMES = '陳林黃張李王吳劉蔡楊許鄭謝郭洪曾邱廖賴周徐蘇葉莊呂江何蕭羅高簡朱鍾施游彭詹胡顏柯翁魏孫樊范方鄧石戴宋薛'
+SURNAME_GROUP = '[' + COMMON_SURNAMES + ']'
+
+def sanitize_pii(text):
+    """
+    落實個人資料保護法、兒童及少年福利與權益保障法及學生輔導法：
+    對會議記錄內可能間接識別特定受輔導、特教或個別學生的班級與姓名進行自動化去識別化脫敏保護
+    """
+    if not text:
+        return ""
+    
+    # 遮罩班級+學生全名（排除學年度、處室、職稱等公務用語）
+    def mask_name(m):
+        cls = m.group(1)
+        name = m.group(2)
+        if any(term in name for term in ['學年', '年度', '試題', '考科', '校長', '主任', '公分', '元為', '教室', '分鐘', '期末', '期中', '複檢']):
+            return m.group(0)
+        if len(name) == 3:
+            return f'{cls}{name[0]}○{name[2]}'
+        elif len(name) == 2:
+            return f'{cls}{name[0]}○'
+        return m.group(0)
+
+    # 1. 班級 + 姓氏 + 生 (如 101 張生 -> 101 ○生)
+    text = re.sub(rf'([1-6]\d{{2}}\s*)({SURNAME_GROUP})生', r'\1○生', text)
+    # 2. 班級 + 常見姓氏全名 2-3 字 (如 508陳榮佑 -> 508陳○佑)
+    text = re.sub(rf'([1-6]\d{{2}}\s*)({SURNAME_GROUP}[\u4e00-\u9fa5]{{1,2}})(?=\s|$)', mask_name, text)
+    return text
+
 def enrich_meeting(m):
     """提取學年度、週次、處室標籤與提煉本次會議各項連結"""
-    text = m.get("text", "")
+    text = sanitize_pii(m.get("text", ""))
+    m["text"] = text
     lines = [l.strip() for l in text.split("\n") if l.strip()]
     
     # 處室標籤（僅當該處室確有獨立報告標題時才納入標籤，避免隨意提及誤判）
