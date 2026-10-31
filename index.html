@@ -771,10 +771,8 @@ function renderNav() {
   let filtered = data;
   if (currentDeptFilter) {
     const core = currentDeptFilter.replace(/(處|室)$/, '');
-    filtered = data.filter(m => 
-      (m.tags && m.tags.some(t => t.includes(core))) || 
-      (m.text && m.text.includes(core))
-    );
+    // 嚴格依據處室標籤 (tags) 快篩，只有該處室真正有報告的會議才會顯示
+    filtered = data.filter(m => m.tags && m.tags.some(t => t.includes(core)));
   }
 
   if (!filtered.length) {
