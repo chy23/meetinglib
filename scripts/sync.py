@@ -1,16 +1,38 @@
-"""從 Apps Script 同步會議索引與 PDF 到 data/，並提取學年度、標籤與 AI 結構化重點摘要。"""
-import base64, json, os, re, urllib.request
+"""從 Apps Script 同步會議索引、PDF 與抽取實體圖檔（含表格截圖、照片）到 data/，並提煉重點摘要。"""
+import base64, json, os, re, shutil, urllib.request
 
 API = os.environ.get("API_URL") or open("index.html", encoding="utf-8").read().split("const API_URL = '")[1].split("'")[0]
 ROOT = os.path.join(os.path.dirname(__file__), "..", "data")
 PDF_DIR = os.path.join(ROOT, "pdf")
+IMG_BASE_DIR = os.path.join(ROOT, "images")
 os.makedirs(PDF_DIR, exist_ok=True)
+os.makedirs(IMG_BASE_DIR, exist_ok=True)
 
 KNOWN_DEPTS = ["教務處", "學務處", "總務處", "輔導處", "輔導室", "人事室", "會計室", "幼兒園"]
 
 def get(url):
     with urllib.request.urlopen(url, timeout=300) as r:
         return r.read()
+
+def extract_pdf_images(pdf_path, dest_dir):
+    """從 PDF 中自動抽出嵌入的實體 JPEG 圖片（含表格截圖、活動照片、公文宣導圖）"""
+    os.makedirs(dest_dir, exist_ok=True)
+    with open(pdf_path, "rb") as f:
+        content = f.read()
+    
+    matches = re.finditer(rb'/Subtype\s*/Image[\s\S]*?/Filter\s*/DCTDecode[\s\S]*?stream\r?\n([\s\S]*?)\r?\nendstream', content)
+    images = []
+    idx = 0
+    for m in matches:
+        raw = m.group(1)
+        if raw.startswith(b'\xff\xd8') and len(raw) >= 8000:
+            idx += 1
+            filename = f"img_{idx}.jpg"
+            dest_path = os.path.join(dest_dir, filename)
+            with open(dest_path, "wb") as img_f:
+                img_f.write(raw)
+            images.append(filename)
+    return images
 
 def enrich_meeting(m):
     """提取學年度、週次、處室標籤與條列式核心摘要"""
@@ -119,6 +141,12 @@ def main():
             optimize_pdf(path)
 
         enriched = enrich_meeting(m)
+        
+        # 抽取實體圖片檔
+        dest_dir = os.path.join(IMG_BASE_DIR, m["id"])
+        imgs = extract_pdf_images(path, dest_dir)
+        enriched["images"] = [f"data/images/{m['id']}/{f}" for f in imgs]
+        
         enriched_list.append(enriched)
 
     keep = {m["id"] + ".pdf" for m in new}
@@ -127,8 +155,14 @@ def main():
             print("移除舊檔:", f)
             os.remove(os.path.join(PDF_DIR, f))
 
+    keep_dirs = {m["id"] for m in new}
+    if os.path.exists(IMG_BASE_DIR):
+        for d in os.listdir(IMG_BASE_DIR):
+            if d not in keep_dirs:
+                shutil.rmtree(os.path.join(IMG_BASE_DIR, d), ignore_errors=True)
+
     json.dump(enriched_list, open(idx_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
-    print("同步與結構化分析完成，共", len(enriched_list), "份會議")
+    print("同步、圖片抽取與結構化分析完成，共", len(enriched_list), "份會議")
 
 if __name__ == "__main__":
     main()
