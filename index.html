@@ -699,7 +699,8 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbxKcTnI295GXzyUzAkfN0Ro
 
 let data = [];
 let cur = null;
-let currentViewMode = localStorage.getItem('viewMode') || 'text'; // 'text' 或 'pdf'
+// 預設採用「完整圖文版（原始原貌，含完整照片、表格、圖表與公文排版）」
+let currentViewMode = localStorage.getItem('viewMode_v2') || 'pdf';
 let currentDeptFilter = '';
 let currentFontSize = parseInt(localStorage.getItem('docFontSize') || '16', 10);
 
@@ -964,11 +965,11 @@ async function show(id, kw = null, updateHash = true) {
 
           <!-- 模式切換按鈕 -->
           <div class="mode-switch-wrap">
-            <button class="mode-btn ${currentViewMode === 'text' ? 'active' : ''}" id="btnModeText" onclick="switchMode('text')">
-              ⚡ 純文字速讀
+            <button class="mode-btn ${currentViewMode === 'pdf' ? 'active' : ''}" id="btnModePdf" onclick="switchMode('pdf')" title="包含所有原始照片、圖表、附表與公文排版">
+              📑 完整圖文 (含照片、表格)
             </button>
-            <button class="mode-btn ${currentViewMode === 'pdf' ? 'active' : ''}" id="btnModePdf" onclick="switchMode('pdf')">
-              📑 原始 PDF
+            <button class="mode-btn ${currentViewMode === 'text' ? 'active' : ''}" id="btnModeText" onclick="switchMode('text')" title="大字速讀純文字，不含圖片表格">
+              📝 大字純文字
             </button>
           </div>
         </div>
@@ -987,6 +988,10 @@ async function show(id, kw = null, updateHash = true) {
 
       <!-- 純文字速讀檢視 -->
       <div class="text-content" id="textContent" style="${currentViewMode === 'text' ? '' : 'display:none'}">
+        <div style="background:var(--warm-bg);border:1px solid #f2dfc5;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--warm);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span>📸 <b>提示</b>：純文字模式僅呈現文字。若需查看<b>活動照片、公文附表、日程表、各處室圖表或蓋章簽核</b>，請點右側按鈕：</span>
+          <button onclick="switchMode('pdf')" style="border:none;background:var(--accent);color:#fff;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">📑 切換為完整圖文 (含照片表格)</button>
+        </div>
         ${formatTextContent(cur.text)}
       </div>
 
@@ -1013,33 +1018,58 @@ async function show(id, kw = null, updateHash = true) {
 // 切換閱讀模式
 function switchMode(mode) {
   currentViewMode = mode;
-  localStorage.setItem('viewMode', mode);
-  $('btnModeText').classList.toggle('active', mode === 'text');
+  localStorage.setItem('viewMode_v2', mode);
   $('btnModePdf').classList.toggle('active', mode === 'pdf');
+  $('btnModeText').classList.toggle('active', mode === 'text');
   $('textContent').style.display = mode === 'text' ? 'block' : 'none';
   $('pages').style.display = mode === 'pdf' ? 'block' : 'none';
 
   if (mode === 'pdf' && !$('pages').querySelector('.page')) {
     renderPdfMode(cur.id);
   }
-  showToast(mode === 'text' ? '已切換為純文字速讀模式' : '已切換為原始 PDF 模式');
+  showToast(mode === 'pdf' ? '已切換為完整圖文版（含照片與表格）' : '已切換為大字純文字速讀');
 }
 
-// 跳轉到特定處室
-function jumpToDept(deptName) {
-  if (currentViewMode !== 'text') {
-    switchMode('text');
-  }
-  setTimeout(() => {
+// 跳轉到特定處室（支援完整圖文 PDF 模式與大字純文字模式）
+async function jumpToDept(deptName) {
+  if (currentViewMode === 'text') {
     const el = document.getElementById('dept-' + deptName);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
       el.style.outline = '2px solid var(--accent)';
       setTimeout(() => el.style.outline = '', 1500);
-    } else {
-      showToast('未找到 ' + deptName + ' 專屬段落');
+      showToast(`已跳轉至 ${deptName}`);
+      return;
     }
-  }, 100);
+  }
+
+  // 完整圖文 (PDF) 模式：直接在原版 PDF 頁面中尋找該處室並平滑滾動，保留照片與表格！
+  showToast(`正在定位 ${deptName} 所在頁面…`);
+  try {
+    const pdf = window.currentPdf || await getPdf(cur.id);
+    const wraps = $('pages').querySelectorAll('.page');
+    for (let n = 1; n <= pdf.numPages; n++) {
+      const page = await pdf.getPage(n);
+      const textContent = await page.getTextContent();
+      const hasDept = textContent.items.some(it => it.str.includes(deptName));
+      if (hasDept) {
+        const wrap = wraps[n - 1];
+        if (wrap) {
+          if (!wrap.dataset.done && window.pdfDrawPage) {
+            await window.pdfDrawPage(n, wrap);
+          }
+          wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          wrap.style.boxShadow = '0 0 0 4px var(--accent)';
+          setTimeout(() => wrap.style.boxShadow = '', 2000);
+          showToast(`✅ 已定位至第 ${n} 頁（${deptName}）`);
+          return;
+        }
+      }
+    }
+    showToast(`未在文件中找到 ${deptName} 專屬段落`);
+  } catch (e) {
+    showToast(`跳轉失敗：${e.message}`);
+  }
 }
 
 // 複製分享連結
@@ -1075,6 +1105,7 @@ async function renderPdfMode(id, kw) {
   try {
     const pdf = await getPdf(id);
     if (token !== renderToken) return;
+    window.currentPdf = pdf;
     box.innerHTML = '';
 
     const draw = async (n, wrap) => {
@@ -1096,6 +1127,7 @@ async function renderPdfMode(id, kw) {
       await pdfjsLib.renderTextLayer({ textContentSource: await page.getTextContent(), container: tl, viewport: vp }).promise;
       return tl;
     };
+    window.pdfDrawPage = draw;
 
     const first = await pdf.getPage(1);
     if (token !== renderToken) return;
