@@ -26,7 +26,7 @@
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
-    --font-base: 16px;
+    --pdf-zoom: 1.0;
   }
 
   * { box-sizing: border-box; }
@@ -35,7 +35,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     background: var(--bg);
     color: var(--ink);
-    font-size: var(--font-base);
+    font-size: 15px;
     line-height: 1.6;
     overflow-x: hidden;
   }
@@ -133,30 +133,42 @@
   }
   .search-clear.show { display: flex; }
 
-  /* 頂部右側動作 */
+  /* 頂部縮放與動作工具 */
   .header-actions {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
-  .btn-icon {
-    height: 36px;
-    padding: 0 10px;
+  .zoom-controls {
+    display: flex;
+    align-items: center;
+    background: var(--panel-sub);
     border: 1px solid var(--line);
-    background: var(--panel);
-    color: var(--ink);
     border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .btn-zoom {
+    height: 32px;
+    padding: 0 10px;
+    border: none;
+    background: transparent;
+    color: var(--ink);
     font-size: 13px;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    transition: all 0.15s;
+    justify-content: center;
+    transition: background 0.15s;
   }
-  .btn-icon:hover {
-    background: var(--panel-sub);
-    border-color: var(--muted);
+  .btn-zoom:hover { background: #e8e6dc; }
+  .zoom-level {
+    font-size: 12px;
+    padding: 0 8px;
+    color: var(--muted);
+    min-width: 48px;
+    text-align: center;
+    user-select: none;
   }
   .menu-toggle {
     display: none;
@@ -212,9 +224,7 @@
   }
 
   /* 會議目錄分組 */
-  .nav-group {
-    margin-bottom: 8px;
-  }
+  .nav-group { margin-bottom: 8px; }
   .group-header {
     display: flex;
     align-items: center;
@@ -302,25 +312,26 @@
   main {
     flex: 1;
     overflow-y: auto;
-    padding: 28px 36px 60px;
+    padding: 24px 32px 60px;
     scroll-behavior: smooth;
   }
 
   .doc {
     background: var(--panel);
-    padding: 36px 44px;
+    padding: 32px 38px;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     max-width: 960px;
     margin: 0 auto;
     border: 1px solid var(--line);
+    transition: max-width 0.2s ease;
   }
 
   /* 文章標題與控制工具列 */
   .doc-header {
     border-bottom: 1px solid var(--line-light);
-    padding-bottom: 20px;
-    margin-bottom: 24px;
+    padding-bottom: 18px;
+    margin-bottom: 20px;
   }
   .doc-title-row {
     display: flex;
@@ -343,39 +354,12 @@
     color: var(--muted);
     font-size: 14px;
     flex-wrap: wrap;
+    margin-top: 6px;
   }
   .meta-tag {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-  }
-
-  /* 模式切換按鈕 (純文字 vs 原版PDF) */
-  .mode-switch-wrap {
-    display: inline-flex;
-    background: var(--bg);
-    padding: 4px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--line);
-  }
-  .mode-btn {
-    padding: 6px 14px;
-    font-size: 13px;
-    font-weight: 600;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.15s;
-  }
-  .mode-btn.active {
-    background: var(--panel);
-    color: var(--accent);
-    box-shadow: var(--shadow-sm);
   }
 
   /* 操作工具列 */
@@ -387,7 +371,7 @@
   }
   .tool-btn {
     padding: 6px 12px;
-    font-size: 12px;
+    font-size: 12.5px;
     border: 1px solid var(--line);
     background: var(--panel-sub);
     color: var(--ink-light);
@@ -397,6 +381,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
+    transition: all 0.15s;
   }
   .tool-btn:hover {
     background: #fff;
@@ -404,13 +389,13 @@
     border-color: var(--accent);
   }
 
-  /* 本次會議 AI 重點摘要卡片 (TL;DR) */
+  /* 本次會議重點速覽卡片 (TL;DR) */
   .summary-card {
     background: var(--warm-bg);
     border: 1px solid #f2dfc5;
     border-radius: var(--radius-md);
     padding: 16px 20px;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
   .summary-header {
     display: flex;
@@ -440,6 +425,7 @@
     flex-direction: column;
     gap: 8px;
   }
+  .summary-list.collapsed { display: none; }
   .summary-item {
     font-size: 13.5px;
     line-height: 1.5;
@@ -473,13 +459,14 @@
   }
   .dept-jump-bar span { color: var(--muted); font-size: 12px; }
   .dept-jump-pill {
-    padding: 2px 8px;
+    padding: 3px 10px;
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 12px;
     color: var(--accent);
     cursor: pointer;
     font-size: 12px;
+    font-weight: 500;
     transition: all 0.15s;
   }
   .dept-jump-pill:hover {
@@ -488,289 +475,12 @@
     border-color: var(--accent);
   }
 
-  /* 純文字模式排版 (Text Mode) */
-  .text-content {
-    font-size: var(--doc-font-size, 16px);
-    line-height: 1.85;
-    color: #272d34;
-  }
-  .text-section-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--accent-dark);
-    margin: 28px 0 12px;
-    padding-left: 10px;
-    border-left: 4px solid var(--accent);
-  }
-  .text-dept-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--warm);
-    background: var(--warm-bg);
-    display: inline-block;
-    padding: 3px 12px;
-    border-radius: var(--radius-sm);
-    margin: 22px 0 8px;
-  }
-  .text-subdept-title {
-    font-weight: 700;
-    color: var(--ink);
-    margin: 14px 0 4px;
-  }
-  .text-line {
-    margin-bottom: 8px;
-    word-break: break-word;
-  }
-  .text-line a {
-    color: var(--accent);
-    text-decoration: underline;
-  }
-
-  /* 純文字表格與圖片框框 */
-  .ascii-table-wrap {
-    margin: 18px 0;
-    background: #ffffff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-  }
-  .ascii-table-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 16px;
-    background: #f7fafc;
-    border-bottom: 1px solid var(--line);
-  }
-  .ascii-table-title {
-    font-size: 13.5px;
-    font-weight: 700;
-    color: var(--accent-dark);
-  }
-  .table-actions {
-    display: flex;
-    gap: 6px;
-  }
-  .tool-btn-sm {
-    padding: 3px 8px;
-    font-size: 11.5px;
-    border: 1px solid var(--line);
-    background: #fff;
-    color: var(--ink-light);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .tool-btn-sm:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .table-view-grid {
-    padding: 12px 16px;
-    overflow-x: auto;
-  }
-  .perfect-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
-    font-size: 14px;
-    border: 1px solid #d0d7de;
-  }
-  .perfect-table th {
-    background: #edf2f7;
-    color: var(--accent-dark);
-    font-weight: 700;
-    padding: 8px 14px;
-    border: 1px solid #d0d7de;
-    text-align: left;
-    white-space: nowrap;
-  }
-  .perfect-table td {
-    padding: 8px 14px;
-    border: 1px solid #d0d7de;
-    color: var(--ink);
-    line-height: 1.5;
-  }
-  .perfect-table tr:nth-child(even) td {
-    background: #f8fafc;
-  }
-  .perfect-table tr:hover td {
-    background: #f0f7ff;
-  }
-  .ascii-table {
-    margin: 0;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 13.5px;
-    line-height: 1.45;
-    color: #1a202c;
-    overflow-x: auto;
-    white-space: pre;
-    padding: 12px 16px;
-    background: #fdfbf7;
-  }
-  .ascii-img-box {
-    margin: 14px 0;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .ascii-img-box:hover {
-    transform: translateY(-1px);
-  }
-  .ascii-img-box:hover .ascii-frame {
-    border-color: var(--accent);
-    background: #f0f7ff;
-    color: var(--accent-dark);
-  }
-  .ascii-frame {
-    margin: 0;
-    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
-    font-size: 13px;
-    line-height: 1.45;
-    color: var(--warm);
-    background: var(--warm-bg);
-    border: 1px solid #ebd9c3;
-    border-radius: var(--radius-sm);
-    padding: 10px 14px;
-    overflow-x: auto;
-    white-space: pre;
-  }
-
-  /* 實體圖檔與表格截圖專區 */
-  .img-gallery-card {
-    background: #ffffff;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-md);
-    padding: 14px 18px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
-  }
-  .img-gallery-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-  }
-  .img-gallery-title {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--accent-dark);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .img-gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 12px;
-    margin-top: 14px;
-  }
-  .img-gallery-grid.collapsed { display: none; }
-  .gallery-thumb-wrap {
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-    text-align: center;
-  }
-  .gallery-thumb-wrap:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--accent);
-  }
-  .gallery-thumb {
-    width: 100%;
-    height: 130px;
-    object-fit: contain;
-    background: #fff;
-    display: block;
-    padding: 4px;
-  }
-  .gallery-thumb-label {
-    padding: 6px;
-    font-size: 11.5px;
-    color: var(--ink-light);
-    background: #f7fafc;
-    border-top: 1px solid var(--line-light);
-  }
-
-  /* 內文嵌入實體截圖圖檔 */
-  .embedded-real-img-wrap {
-    margin: 16px 0;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: #ffffff;
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-  }
-  .real-img-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: #f8fafc;
-    border-bottom: 1px solid var(--line-light);
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--accent-dark);
-  }
-  .doc-real-img {
-    max-width: 100%;
-    max-height: 480px;
-    margin: 0 auto;
-    display: block;
-    cursor: zoom-in;
-    padding: 8px;
-    background: #fff;
-  }
-
-  /* 全螢幕燈箱 Lightbox */
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    background: rgba(18, 22, 26, 0.88);
-    backdrop-filter: blur(4px);
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    cursor: zoom-out;
-    padding: 24px;
-  }
-  .lightbox.show { display: flex; }
-  .lightbox img {
-    max-width: 92vw;
-    max-height: 86vh;
-    border-radius: var(--radius-sm);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
-    background: #fff;
-    cursor: default;
-  }
-  .lightbox-close {
-    position: absolute;
-    top: 20px;
-    right: 24px;
-    color: #fff;
-    font-size: 30px;
-    cursor: pointer;
-    font-weight: 300;
-    line-height: 1;
-    opacity: 0.85;
-    transition: opacity 0.15s;
-  }
-  .lightbox-close:hover { opacity: 1; }
-  .lightbox-caption {
-    color: #e2e8f0;
-    font-size: 13px;
-    margin-top: 12px;
-  }
-
   /* 原始 PDF 模式 (PDF Mode) */
-  #pages { width: 100%; display: none; }
+  #pages {
+    width: 100%;
+    display: block;
+    margin-top: 10px;
+  }
   .page {
     position: relative;
     margin: 0 auto 20px;
@@ -778,9 +488,27 @@
     background: #fff;
     border-radius: 4px;
     overflow: hidden;
+    transition: box-shadow 0.3s ease;
   }
   .page canvas { display: block; }
-  .textLayer .kw { background: rgba(255, 213, 0, 0.45); }
+  .textLayer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    opacity: 0.2;
+    line-height: 1.0;
+  }
+  .textLayer ::selection {
+    background: #2e5c8a;
+    color: #fff;
+  }
+  .textLayer .kw {
+    background: rgba(255, 213, 0, 0.65) !important;
+    border-radius: 2px;
+  }
   .loading-msg {
     padding: 40px;
     text-align: center;
@@ -851,7 +579,7 @@
 
   /* 列印最佳化 */
   @media print {
-    header, nav, .toolbar, .mode-switch-wrap, .filter-tags, .dept-jump-bar { display: none !important; }
+    header, nav, .toolbar, .filter-tags, .dept-jump-bar, .summary-card { display: none !important; }
     body { background: #fff; color: #000; }
     .wrap { display: block; height: auto; }
     main { padding: 0; }
@@ -885,9 +613,10 @@
     }
     .nav-backdrop.open { display: block; }
     main { padding: 16px 14px; }
-    .doc { padding: 20px 16px; }
+    .doc { padding: 18px 14px; }
     .doc h2 { font-size: 20px; }
     .doc-title-row { flex-direction: column; }
+    .zoom-controls { display: none; }
   }
 </style>
 </head>
@@ -905,13 +634,17 @@
 
   <div class="search-wrap">
     <span class="search-icon">🔍</span>
-    <input id="q" placeholder="全文檢索所有會議紀錄… (Ctrl+F)" autocomplete="off">
+    <input id="q" placeholder="全文檢索所有會議紀錄… (Ctrl+F 或 ⌘K)" autocomplete="off">
     <button class="search-clear" id="searchClear" aria-label="清除搜尋">✕</button>
   </div>
 
   <div class="header-actions">
-    <button class="btn-icon" id="fontDown" title="縮小字體">A-</button>
-    <button class="btn-icon" id="fontUp" title="放大字體">A+</button>
+    <div class="zoom-controls">
+      <button class="btn-zoom" id="zoomOut" title="縮小 (Zoom Out)">🔍−</button>
+      <span class="zoom-level" id="zoomLabel">100%</span>
+      <button class="btn-zoom" id="zoomIn" title="放大 (Zoom In)">🔍+</button>
+      <button class="btn-zoom" id="zoomReset" title="重設縮放">適應</button>
+    </div>
   </div>
 </header>
 
@@ -935,36 +668,15 @@
 
 <div id="toast"></div>
 
-<!-- 全螢幕燈箱 Lightbox -->
-<div id="lightbox" class="lightbox" onclick="closeLightbox()">
-  <div class="lightbox-close" onclick="closeLightbox()">✕</div>
-  <img id="lightboxImg" src="" onclick="event.stopPropagation()">
-  <div class="lightbox-caption" id="lightboxCap">點擊圖片外任意處關閉</div>
-</div>
-
 <script>
-// ===== 全螢幕燈箱操作 =====
-function openLightbox(url) {
-  $('lightboxImg').src = url;
-  $('lightbox').classList.add('show');
-}
-function closeLightbox() {
-  $('lightbox').classList.remove('show');
-}
-window.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLightbox();
-});
-
 // ===== 後端 Apps Script API（備援用）=====
 const API_URL = 'https://script.google.com/macros/s/AKfycbxKcTnI295GXzyUzAkfN0RoWRFot20CI2C70Ok8Vc14AiNsZrkvcEsKnzC4uz1nPXr9/exec';
 // ===========================================
 
 let data = [];
 let cur = null;
-// 預設採用「完整圖文版（原始原貌，含完整照片、表格、圖表與公文排版）」
-let currentViewMode = localStorage.getItem('viewMode_v2') || 'pdf';
 let currentDeptFilter = '';
-let currentFontSize = parseInt(localStorage.getItem('docFontSize') || '16', 10);
+let currentZoom = parseFloat(localStorage.getItem('pdfZoom') || '1.0');
 
 const $ = id => document.getElementById(id);
 const esc = s => (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -978,16 +690,23 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-// 字級調節
-function setFontSize(delta) {
-  currentFontSize = Math.max(14, Math.min(24, currentFontSize + delta));
-  localStorage.setItem('docFontSize', currentFontSize);
-  document.documentElement.style.setProperty('--doc-font-size', currentFontSize + 'px');
-  showToast(`字體大小：${currentFontSize}px`);
+// 縮放控制
+function setZoom(scale, reRender = true) {
+  currentZoom = Math.max(0.7, Math.min(1.8, Math.round(scale * 10) / 10));
+  localStorage.setItem('pdfZoom', currentZoom);
+  $('zoomLabel').textContent = Math.round(currentZoom * 100) + '%';
+  const docEl = document.querySelector('.doc');
+  if (docEl) {
+    const baseW = 960;
+    docEl.style.maxWidth = Math.round(baseW * currentZoom) + 'px';
+  }
+  if (reRender && cur) {
+    renderPdfMode(cur.id);
+  }
 }
-$('fontUp').onclick = () => setFontSize(2);
-$('fontDown').onclick = () => setFontSize(-2);
-document.documentElement.style.setProperty('--doc-font-size', currentFontSize + 'px');
+$('zoomIn').onclick = () => { setZoom(currentZoom + 0.15); showToast(`文件縮放：${Math.round(currentZoom * 100)}%`); };
+$('zoomOut').onclick = () => { setZoom(currentZoom - 0.15); showToast(`文件縮放：${Math.round(currentZoom * 100)}%`); };
+$('zoomReset').onclick = () => { setZoom(1.0); showToast('已重設為標準寬度'); };
 
 // 手機選單抽屜
 const nav = $('nav');
@@ -1108,253 +827,6 @@ function toggleNavGroup(headerEl) {
   group.classList.toggle('collapsed');
 }
 
-// 純文字寬度計算（中文字佔 2，英數佔 1）
-function textWidth(s) {
-  let w = 0;
-  for (let c of (s || '')) {
-    w += c.charCodeAt(0) > 127 ? 2 : 1;
-  }
-  return w;
-}
-
-// 以 +、- 與 | 組合出標準 ASCII 表格
-function formatAsciiTable(headers, rows) {
-  const cols = headers.length;
-  const widths = headers.map(h => textWidth(h));
-  rows.forEach(r => {
-    for (let idx = 0; idx < cols; idx++) {
-      const cell = r[idx] || '';
-      widths[idx] = Math.max(widths[idx], textWidth(cell));
-    }
-  });
-
-  const colPads = widths.map(w => Math.max(w, 4) + 2);
-  function pad(s, width) {
-    const tw = textWidth(s);
-    return (s || '') + ' '.repeat(Math.max(0, width - tw));
-  }
-
-  const sep = '+' + colPads.map(w => '-'.repeat(w)).join('+') + '+';
-  const headerLine = '|' + headers.map((h, i) => ' ' + pad(h, colPads[i] - 1)).join('|') + '|';
-
-  const lines = [sep, headerLine, sep];
-  rows.forEach(r => {
-    const rowLine = '|' + headers.map((_, i) => ' ' + pad(r[i] || '', colPads[i] - 1)).join('|') + '|';
-    lines.push(rowLine);
-  });
-  lines.push(sep);
-  return lines.join('\n');
-}
-
-// 圖片 ASCII 框線提示
-function formatAsciiImgBox(caption) {
-  const inner = `📷【原始公文附圖 / 照片】 ${caption || ''}`.trim();
-  const tw = textWidth(inner);
-  const width = Math.max(tw + 4, 60);
-  function pad(s, w) {
-    return (s || '') + ' '.repeat(Math.max(0, w - textWidth(s)));
-  }
-  const sep = '+' + '-'.repeat(width) + '+';
-  const l1 = '|  ' + pad(inner, width - 2) + '|';
-  const l2 = '|  ' + pad('👉 點此切換至【📑 完整圖文版】直接查看原始彩色照片與圖檔', width - 2) + '|';
-  return [sep, l1, l2, sep].join('\n');
-}
-
-// 常見學校公文表格標題特徵庫
-const KNOWN_TABLE_HEADERS = [
-  ['時間', '班級', '入班人員', '時間', '班級', '入班人員'],
-  ['時間', '班級', '入班人員'],
-  ['日 期', '時 間', '學 生', '地 點', '備註'],
-  ['日期', '時間', '學生', '地點', '備註'],
-  ['項目', '班級'],
-  ['類 別', '上 課 時 間', '年 級', '報名人數', '開班數', '開課日期'],
-  ['類別', '上課時間', '年級', '報名人數', '開班數', '開課日期'],
-  ['日期', '年級'],
-  ['日 期', '年 級'],
-];
-
-// 儲存表格純文字以便一鍵複製
-const tableTextStore = {};
-let tableCounter = 0;
-
-function copyTableText(tableId) {
-  const text = tableTextStore[tableId];
-  if (!text) return;
-  navigator.clipboard.writeText(text).then(() => {
-    showToast('✅ 已複製純文字表格至剪貼簿！');
-  }).catch(() => {
-    showToast('複製失敗');
-  });
-}
-
-function toggleTableView(tableId) {
-  const grid = $('grid-' + tableId);
-  const ascii = $('ascii-' + tableId);
-  if (!grid || !ascii) return;
-  const isGrid = grid.style.display !== 'none';
-  grid.style.display = isGrid ? 'none' : 'block';
-  ascii.style.display = isGrid ? 'block' : 'none';
-  showToast(isGrid ? '已切換為純 ASCII 等寬視圖' : '已切換為直線精準對齊視圖');
-}
-
-// 格式化 OCR 純文字為易讀排版（含垂直直線絕對對齊之結構化表格與實體圖片/圖片框框）
-function formatTextContent(rawText, curDoc) {
-  if (!rawText) return '<p class="text-line">（尚無文字內容）</p>';
-  const rawLines = rawText.split('\n').map(l => l.trim());
-  let html = '';
-  let i = 0;
-  let imgIndex = 0;
-
-  while (i < rawLines.length) {
-    const line = rawLines[i];
-    if (!line) { i++; continue; }
-
-    // 1. 偵測並重建結構化表格
-    let matchedHeader = null;
-    for (let headers of KNOWN_TABLE_HEADERS) {
-      const hLen = headers.length;
-      if (i + hLen <= rawLines.length) {
-        const window = rawLines.slice(i, i + hLen);
-        if (window.map(w => w.replace(/\s+/g, '')).join(',') === headers.map(h => h.replace(/\s+/g, '')).join(',')) {
-          matchedHeader = headers;
-          break;
-        }
-      }
-    }
-
-    if (matchedHeader) {
-      const hLen = matchedHeader.length;
-      i += hLen;
-      const cols = (matchedHeader.length === 6 && matchedHeader[0].includes('時間') && matchedHeader[3].includes('時間')) ? 3 : matchedHeader.length;
-      const dataCells = [];
-
-      while (i < rawLines.length) {
-        const candidate = rawLines[i];
-        if (!candidate) { i++; continue; }
-        // 遇到大標題、處室或明顯長段落則停止表格收集
-        if (/^[壹貳參肆伍陸柒捌玖拾]、|^【|^[一二三四五六七八九十]、|^※/.test(candidate) || candidate.length > 75) {
-          break;
-        }
-        dataCells.push(candidate);
-        i++;
-      }
-
-      // 智能分列（特別處理日期欄位排版，防止 11/10 暫停一次 與 11/12 期中評量 錯位）
-      const rows = [];
-      let currRow = [];
-      const hasDateCol = matchedHeader[0].includes('時間') || matchedHeader[0].includes('日期');
-
-      for (let cell of dataCells) {
-        if (hasDateCol && /^\d{1,2}\/\d{1,2}/.test(cell) && currRow.length >= 2) {
-          while (currRow.length < cols) currRow.push('');
-          rows.push(currRow);
-          currRow = [cell];
-        } else {
-          currRow.push(cell);
-          if (currRow.length === cols) {
-            rows.push(currRow);
-            currRow = [];
-          }
-        }
-      }
-      if (currRow.length > 0) {
-        while (currRow.length < cols) currRow.push('');
-        rows.push(currRow);
-      }
-
-      if (rows.length > 0) {
-        const tableId = 'tbl_' + (++tableCounter);
-        const asciiHeaders = matchedHeader.slice(0, cols);
-        const asciiTable = formatAsciiTable(asciiHeaders, rows);
-        tableTextStore[tableId] = asciiTable;
-
-        html += `
-          <div class="ascii-table-wrap" id="table-wrap-${tableId}">
-            <div class="ascii-table-top-bar">
-              <span class="ascii-table-title">📊 結構化表格（直線精確對齊）：</span>
-              <div class="table-actions">
-                <button class="tool-btn-sm" onclick="copyTableText('${tableId}')" title="複製純文字表格">📋 複製表格</button>
-                <button class="tool-btn-sm" onclick="toggleTableView('${tableId}')" title="切換精確對齊或純 ASCII 文字">切換視圖</button>
-              </div>
-            </div>
-            
-            <!-- 垂直線絕對 100% 直線對齊視圖 -->
-            <div class="table-view-grid" id="grid-${tableId}">
-              <table class="perfect-table">
-                <thead>
-                  <tr>
-                    ${asciiHeaders.map(h => `<th>${esc(h)}</th>`).join('')}
-                  </tr>
-                </thead>
-                <tbody>
-                  ${rows.map(r => `
-                    <tr>
-                      ${r.map(c => `<td>${esc(c)}</td>`).join('')}
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-
-            <!-- 純 ASCII 等寬字型視圖（可供自由切換） -->
-            <pre class="ascii-table" id="ascii-${tableId}" style="display:none">${esc(asciiTable)}</pre>
-          </div>
-        `;
-        continue;
-      }
-    }
-
-    // 2. 大標題：壹、貳、參...
-    if (/^[壹貳參肆伍陸柒捌玖拾]、/.test(line)) {
-      html += `<div class="text-section-title">${esc(line)}</div>`;
-    }
-    // 處室標題：【教務處】等
-    else if (/^【(教務處|學務處|總務處|輔導處|輔導室|人事室|會計室|校長室|幼兒園)】/.test(line)) {
-      const deptName = line.match(/【([^】]+)】/)[1];
-      html += `<div class="text-dept-title" id="dept-${esc(deptName)}">${esc(line)}</div>`;
-    }
-    // 組別標題：【教學組】等
-    else if (/^【.+】/.test(line)) {
-      html += `<div class="text-subdept-title">${esc(line)}</div>`;
-    }
-    // 3. 一般文字段落
-    else {
-      let linked = esc(line).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
-      html += `<div class="text-line">${linked}</div>`;
-
-      // 4. 偵測圖片關鍵字並畫出框框提示與實體圖片
-      if (/(?:附圖|如圖|圖片|照片|路線圖|示意圖|宣導圖|海報)/.test(line)) {
-        const caption = line.length < 35 ? line : '';
-        const asciiImg = formatAsciiImgBox(caption);
-        let realImgHtml = '';
-        if (curDoc && curDoc.images && curDoc.images.length > imgIndex) {
-          const imgUrl = curDoc.images[imgIndex++];
-          realImgHtml = `
-            <div class="embedded-real-img-wrap">
-              <div class="real-img-top">
-                <span>🖼️ 原始公文附圖 / 表格截圖原貌：</span>
-                <button class="tool-btn-sm" onclick="openLightbox('${imgUrl}')">🔍 全螢幕放大查看</button>
-              </div>
-              <img src="${imgUrl}" class="doc-real-img" loading="lazy" onclick="openLightbox('${imgUrl}')" alt="公文附圖/表格截圖">
-            </div>
-          `;
-        }
-
-        html += `
-          <div class="ascii-img-box" onclick="switchMode('pdf')" title="點此切換至完整圖文版查看原始圖片">
-            <pre class="ascii-frame">${esc(asciiImg)}</pre>
-          </div>
-          ${realImgHtml}
-        `;
-      }
-    }
-
-    i++;
-  }
-
-  return html;
-}
-
 // PDF.js 核心
 const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
@@ -1382,7 +854,7 @@ function getPdf(id) {
   return pdfCache[id];
 }
 
-// 開啟與呈現會議
+// 開啟與呈現會議 (100% 完整原貌版，含所有照片、完整表格與簽核)
 async function show(id, kw = null, updateHash = true) {
   cur = data.find(m => m.id === id);
   if (!cur) return;
@@ -1405,7 +877,7 @@ async function show(id, kw = null, updateHash = true) {
     </div>
   ` : '';
 
-  // 組合 AI / 條列重點摘要卡片
+  // 組合重點摘要卡片 (TL;DR)
   let summaryHtml = '';
   if (cur.summary && cur.summary.length) {
     summaryHtml = `
@@ -1426,49 +898,18 @@ async function show(id, kw = null, updateHash = true) {
     `;
   }
 
-  // 組合實體圖片專區 (Gallery)
-  let galleryHtml = '';
-  if (cur.images && cur.images.length > 0) {
-    galleryHtml = `
-      <div class="img-gallery-card">
-        <div class="img-gallery-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
-          <span class="img-gallery-title">🖼️ 本次公文實體圖檔與表格截圖專區（共 ${cur.images.length} 張）</span>
-          <span class="tool-btn-sm">展開 / 收合</span>
-        </div>
-        <div class="img-gallery-grid">
-          ${cur.images.map((img, idx) => `
-            <div class="gallery-thumb-wrap" onclick="openLightbox('${img}')">
-              <img src="${img}" class="gallery-thumb" loading="lazy" alt="附圖 ${idx + 1}">
-              <div class="gallery-thumb-label">附圖 ${idx + 1}（點擊放大）</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  }
-
   // 建立主卡片
   $('main').innerHTML = `
-    <div class="doc">
+    <div class="doc" style="max-width:${Math.round(960 * currentZoom)}px">
       <div class="doc-header">
         <div class="doc-title-row">
           <div>
             <h2>${esc(cur.title)}</h2>
-            <div class="doc-meta" style="margin-top:6px">
+            <div class="doc-meta">
               <span class="meta-tag">📅 ${cur.date}</span>
               ${cur.academic_year ? `<span class="meta-tag">🎓 ${esc(cur.academic_year)}</span>` : ''}
               ${cur.week ? `<span class="meta-tag">📌 ${esc(cur.week)}</span>` : ''}
             </div>
-          </div>
-
-          <!-- 模式切換按鈕 -->
-          <div class="mode-switch-wrap">
-            <button class="mode-btn ${currentViewMode === 'pdf' ? 'active' : ''}" id="btnModePdf" onclick="switchMode('pdf')" title="包含所有原始照片、圖表、附表與公文排版">
-              📑 完整圖文 (含照片、表格)
-            </button>
-            <button class="mode-btn ${currentViewMode === 'text' ? 'active' : ''}" id="btnModeText" onclick="switchMode('text')" title="大字速讀純文字，不含圖片表格">
-              📝 大字純文字
-            </button>
           </div>
         </div>
 
@@ -1484,65 +925,19 @@ async function show(id, kw = null, updateHash = true) {
       ${summaryHtml}
       ${deptTagsHtml}
 
-      <!-- 純文字速讀檢視 -->
-      <div class="text-content" id="textContent" style="${currentViewMode === 'text' ? '' : 'display:none'}">
-        <div style="background:var(--warm-bg);border:1px solid #f2dfc5;border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--warm);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-          <span>📸 <b>提示</b>：純文字版已自動為您抽出<b>實體表格截圖與彩色照片</b>展示於下方。若需查看原版排版與簽核，可點右側：</span>
-          <button onclick="switchMode('pdf')" style="border:none;background:var(--accent);color:#fff;padding:4px 12px;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;">📑 切換為完整圖文 (含照片表格)</button>
-        </div>
-        ${galleryHtml}
-        ${formatTextContent(cur.text, cur)}
-      </div>
-
-      <!-- 原始 PDF 檢視 -->
-      <div id="pages" style="${currentViewMode === 'pdf' ? 'display:block' : 'display:none'}">
+      <!-- 原始原貌 PDF 檢視區 -->
+      <div id="pages">
         <p class="loading-msg">📄 正在載入原始文件…</p>
       </div>
     </div>
   `;
 
   $('main').scrollTop = 0;
-
-  // 若帶有關鍵字，在純文字模式中高亮
-  if (kw && currentViewMode === 'text') {
-    highlightTextKw(kw);
-  }
-
-  // 若當前是 PDF 模式，載入 PDF.js
-  if (currentViewMode === 'pdf') {
-    renderPdfMode(id, kw);
-  }
+  renderPdfMode(id, kw);
 }
 
-// 切換閱讀模式
-function switchMode(mode) {
-  currentViewMode = mode;
-  localStorage.setItem('viewMode_v2', mode);
-  $('btnModePdf').classList.toggle('active', mode === 'pdf');
-  $('btnModeText').classList.toggle('active', mode === 'text');
-  $('textContent').style.display = mode === 'text' ? 'block' : 'none';
-  $('pages').style.display = mode === 'pdf' ? 'block' : 'none';
-
-  if (mode === 'pdf' && !$('pages').querySelector('.page')) {
-    renderPdfMode(cur.id);
-  }
-  showToast(mode === 'pdf' ? '已切換為完整圖文版（含照片與表格）' : '已切換為大字純文字速讀');
-}
-
-// 跳轉到特定處室（支援完整圖文 PDF 模式與大字純文字模式）
+// 跳轉到特定處室（直接在原版 PDF 頁面中尋找該處室並平滑滾動，保留原始照片與表格！）
 async function jumpToDept(deptName) {
-  if (currentViewMode === 'text') {
-    const el = document.getElementById('dept-' + deptName);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      el.style.outline = '2px solid var(--accent)';
-      setTimeout(() => el.style.outline = '', 1500);
-      showToast(`已跳轉至 ${deptName}`);
-      return;
-    }
-  }
-
-  // 完整圖文 (PDF) 模式：直接在原版 PDF 頁面中尋找該處室並平滑滾動，保留照片與表格！
   showToast(`正在定位 ${deptName} 所在頁面…`);
   try {
     const pdf = window.currentPdf || await getPdf(cur.id);
@@ -1581,24 +976,11 @@ function copyShareLink() {
   });
 }
 
-// 純文字模式關鍵字高亮
-function highlightTextKw(kw) {
-  const box = $('textContent');
-  if (!box || !kw) return;
-  const re = new RegExp(reEsc(kw), 'gi');
-  box.querySelectorAll('.text-line, .text-section-title, .text-subdept-title').forEach(el => {
-    if (el.textContent.match(re)) {
-      el.innerHTML = el.innerHTML.replace(re, '<mark>$&</mark>');
-    }
-  });
-  const first = box.querySelector('mark');
-  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-// 渲染 PDF 模式（Lazy loading）
+// 渲染 PDF 模式（Lazy loading + TextLayer 支援 Ctrl+F 與文字複製選取）
 async function renderPdfMode(id, kw) {
   const token = ++renderToken;
   const box = $('pages');
+  if (!box) return;
   box.innerHTML = '<p class="loading-msg">📄 正在載入原始文件…</p>';
 
   try {
@@ -1663,12 +1045,11 @@ async function renderPdfMode(id, kw) {
     wraps.forEach(w => io.observe(w));
   } catch (e) {
     if (token !== renderToken) return;
-    box.innerHTML = `<p class="loading-msg">⚠️ 原始文件載入失敗（${esc(e.message)}），已自動切換為純文字模式。</p>`;
-    switchMode('text');
+    box.innerHTML = `<p class="loading-msg">⚠️ 原始文件載入失敗（${esc(e.message)}）。<br><a href="data/pdf/${id}.pdf" target="_blank" style="color:var(--accent);text-decoration:underline;">點此直接開啟 PDF</a></p>`;
   }
 }
 
-// 搜尋功能
+// 搜尋功能（頂部跨會議即時全文搜尋）
 const searchInput = $('q');
 const searchClear = $('searchClear');
 
