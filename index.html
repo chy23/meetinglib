@@ -529,35 +529,56 @@
     border-color: var(--accent);
   }
 
-  /* 處室段落導航條 */
+  /* 處室段落導航條（支援智慧懸浮：往下滑隱藏、往上滑跳出） */
   .dept-jump-bar {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
     margin-bottom: 20px;
-    padding: 10px 14px;
-    background: var(--panel-sub);
+    padding: 10px 16px;
+    background: rgba(253, 251, 247, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--line-light);
+    border: 1px solid var(--line);
     font-size: 13px;
+    position: sticky;
+    top: 10px;
+    z-index: 80;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, box-shadow 0.2s ease;
+    will-change: transform, opacity;
+  }
+  .dept-jump-bar.is-floating {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-color: #d8d2c4;
+    background: rgba(255, 255, 255, 0.96);
+  }
+  .dept-jump-bar.scroll-hidden {
+    transform: translateY(-135%);
+    opacity: 0;
+    pointer-events: none;
   }
   .dept-jump-bar span { color: var(--muted); font-size: 12px; }
   .dept-jump-pill {
-    padding: 3px 10px;
+    padding: 4px 12px;
     background: #fff;
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: 14px;
     color: var(--accent);
     cursor: pointer;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 12.5px;
+    font-weight: 600;
     transition: all 0.15s;
+    user-select: none;
   }
   .dept-jump-pill:hover {
     background: var(--accent);
     color: #fff;
     border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(46,92,138,0.2);
   }
 
   /* 原始 PDF 模式 (PDF Mode) */
@@ -1035,6 +1056,7 @@ async function show(id, kw = null, updateHash = true) {
   `;
 
   $('main').scrollTop = 0;
+  lastMainScrollTop = 0;
   renderPdfMode(id, kw);
 }
 
@@ -1109,12 +1131,21 @@ async function jumpToDept(deptName) {
       await window.pdfDrawPage(finalPage, wrap);
     }
 
-    // 計算在 main 容器內的絕對精確滾動高度，防止頂部被導航列或外框切掉
+    // 計算在 main 容器內的絕對精確滾動高度（預留頂部懸浮列 68px 空間，避免被擋住）
     const mainEl = $('main');
     const mainRect = mainEl.getBoundingClientRect();
     const wrapRect = wrap.getBoundingClientRect();
-    const scrollTarget = mainEl.scrollTop + (wrapRect.top - mainRect.top) - 16;
+    const scrollTarget = mainEl.scrollTop + (wrapRect.top - mainRect.top) - 68;
+
+    // 標記程式跳轉中，避免導航列因滾動而閃爍或隱藏
+    isProgrammaticScroll = true;
+    const bar = document.querySelector('.dept-jump-bar');
+    if (bar) bar.classList.remove('scroll-hidden');
     mainEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+    setTimeout(() => {
+      isProgrammaticScroll = false;
+      lastMainScrollTop = mainEl.scrollTop;
+    }, 700);
 
     // 視覺動畫回饋：醒目發光外框提示
     wrap.style.outline = '4px solid var(--accent)';
@@ -1304,6 +1335,41 @@ window.addEventListener('keydown', e => {
     searchInput.select();
   }
 });
+
+// 智慧懸浮處室導航列：往下滑暫時隱藏、往上滑或靠近頁面頂部立即浮出
+let lastMainScrollTop = 0;
+let isProgrammaticScroll = false;
+let scrollTicking = false;
+
+$('main').addEventListener('scroll', () => {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  requestAnimationFrame(() => {
+    const bar = document.querySelector('.dept-jump-bar');
+    if (bar && !isProgrammaticScroll) {
+      const currentTop = $('main').scrollTop;
+      const diff = currentTop - lastMainScrollTop;
+
+      // 靠近頁面頂端時（< 80px）始終常駐
+      if (currentTop < 80) {
+        bar.classList.remove('scroll-hidden');
+        bar.classList.remove('is-floating');
+      } else {
+        bar.classList.add('is-floating');
+        // 往下滑動超過 8px -> 暫時收合隱藏，放大閱讀視野
+        if (diff > 8) {
+          bar.classList.add('scroll-hidden');
+        }
+        // 只要往上滑動超過 6px -> 立刻跳出顯現
+        else if (diff < -6) {
+          bar.classList.remove('scroll-hidden');
+        }
+      }
+      lastMainScrollTop = currentTop;
+    }
+    scrollTicking = false;
+  });
+}, { passive: true });
 </script>
 </body>
 </html>
