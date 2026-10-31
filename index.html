@@ -389,59 +389,144 @@
     border-color: var(--accent);
   }
 
-  /* 本次會議重點速覽卡片 (TL;DR) */
-  .summary-card {
-    background: var(--warm-bg);
-    border: 1px solid #f2dfc5;
+  /* 本次會議之各項連結卡片 (Links Card) */
+  .links-card {
+    background: #fdfbf7;
+    border: 1px solid #ebd9c3;
     border-radius: var(--radius-md);
-    padding: 16px 20px;
+    padding: 14px 18px;
     margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(139, 94, 52, 0.05);
   }
-  .summary-header {
+  .links-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     cursor: pointer;
     user-select: none;
   }
-  .summary-title {
+  .links-title {
     font-size: 14px;
     font-weight: 700;
     color: var(--warm);
     display: flex;
     align-items: center;
-    gap: 6px;
-  }
-  .summary-toggle {
-    font-size: 12px;
-    color: var(--warm);
-    opacity: 0.8;
-  }
-  .summary-list {
-    margin: 12px 0 0;
-    padding: 0;
-    list-style: none;
-    display: flex;
-    flex-direction: column;
     gap: 8px;
   }
-  .summary-list.collapsed { display: none; }
-  .summary-item {
-    font-size: 13.5px;
-    line-height: 1.5;
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .summary-cat {
-    font-weight: 700;
+  .links-badge {
     font-size: 11px;
     background: #edd8bf;
     color: var(--warm);
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .links-toggle {
+    font-size: 12px;
+    color: var(--warm);
+    opacity: 0.85;
+    cursor: pointer;
+  }
+  .links-grid {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+  }
+  .links-grid.collapsed { display: none; }
+  .link-item {
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 8px;
+    transition: all 0.15s ease;
+  }
+  .link-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(46,92,138,0.1);
+    transform: translateY(-1px);
+  }
+  .link-item-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .link-item-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    line-height: 1.3;
+  }
+  .link-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.45;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .link-item-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 2px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--line-light);
+  }
+  .link-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+  }
+  .link-cat-tag {
+    font-size: 10.5px;
     padding: 1px 6px;
     border-radius: 4px;
+    background: var(--accent-light);
+    color: var(--accent-dark);
     white-space: nowrap;
+    font-weight: 600;
+  }
+  .link-domain {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+  .link-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     flex-shrink: 0;
+  }
+  .btn-link-action {
+    padding: 3px 8px;
+    font-size: 11px;
+    border: 1px solid var(--line);
+    background: var(--panel-sub);
+    color: var(--accent-dark);
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .btn-link-action:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
   }
 
   /* 處室段落導航條 */
@@ -579,7 +664,7 @@
 
   /* 列印最佳化 */
   @media print {
-    header, nav, .toolbar, .filter-tags, .dept-jump-bar, .summary-card { display: none !important; }
+    header, nav, .toolbar, .filter-tags, .dept-jump-bar, .links-card { display: none !important; }
     body { background: #fff; color: #000; }
     .wrap { display: block; height: auto; }
     main { padding: 0; }
@@ -879,23 +964,38 @@ async function show(id, kw = null, updateHash = true) {
     </div>
   ` : '';
 
-  // 組合重點摘要卡片 (TL;DR)
-  let summaryHtml = '';
-  if (cur.summary && cur.summary.length) {
-    summaryHtml = `
-      <div class="summary-card">
-        <div class="summary-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
-          <span class="summary-title">💡 本次會議重點速覽</span>
-          <span class="summary-toggle">收合 / 展開</span>
+  // 組合本次會議各項連結卡片 (Links Card)
+  let linksHtml = '';
+  if (cur.links && cur.links.length > 0) {
+    linksHtml = `
+      <div class="links-card">
+        <div class="links-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+          <span class="links-title">
+            🔗 本次會議之各項連結與表單
+            <span class="links-badge">${cur.links.length} 個</span>
+          </span>
+          <span class="links-toggle">收合 / 展開</span>
         </div>
-        <ul class="summary-list">
-          ${cur.summary.map(s => `
-            <li class="summary-item">
-              <span class="summary-cat">${esc(s.category)}</span>
-              <span>${esc(s.text)}</span>
-            </li>
+        <div class="links-grid">
+          ${cur.links.map(l => `
+            <div class="link-item">
+              <div class="link-item-top">
+                <span class="link-item-icon">${l.icon || '🔗'}</span>
+                <span class="link-item-title" title="${esc(l.title)}">${esc(l.title)}</span>
+              </div>
+              <div class="link-item-bottom">
+                <div class="link-item-meta">
+                  <span class="link-cat-tag">${esc(l.category || '外部連結')}</span>
+                  <span class="link-domain">${esc(l.domain)}</span>
+                </div>
+                <div class="link-actions">
+                  <button class="btn-link-action" onclick="copyUrl('${esc(l.url)}')" title="複製連結網址">📋 複製</button>
+                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener" title="在新分頁開啟">開啟 ↗</a>
+                </div>
+              </div>
+            </div>
           `).join('')}
-        </ul>
+        </div>
       </div>
     `;
   }
@@ -924,7 +1024,7 @@ async function show(id, kw = null, updateHash = true) {
         </div>
       </div>
 
-      ${summaryHtml}
+      ${linksHtml}
       ${deptTagsHtml}
 
       <!-- 原始原貌 PDF 檢視區 -->
@@ -1050,6 +1150,15 @@ function copyShareLink() {
     showToast('✅ 已複製本場會議分享連結！');
   }).catch(() => {
     showToast('複製失敗，連結：' + url);
+  });
+}
+
+// 複製外部連結網址
+function copyUrl(url) {
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('✅ 已複製連結至剪貼簿！');
+  }).catch(() => {
+    showToast('複製失敗，網址：' + url);
   });
 }
 

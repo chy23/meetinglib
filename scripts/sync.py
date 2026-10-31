@@ -34,8 +34,83 @@ def extract_pdf_images(pdf_path, dest_dir):
             images.append(filename)
     return images
 
+def clean_url(u):
+    return re.sub(r'[)）>，。；;]+$', '', u).strip()
+
+def get_domain(u):
+    m = re.search(r'https?://([^/]+)', u)
+    return m.group(1).replace('www.', '') if m else ''
+
+def get_icon(u, title):
+    if 'forms.gle' in u or 'docs.google.com/forms' in u or '表單' in title:
+        return '📝', '線上表單'
+    if 'meet.google.com' in u or 'zoom' in u or '會議' in title:
+        return '📹', '線上會議'
+    if 'drive.google.com' in u or '雲端' in title:
+        return '📁', '雲端資源'
+    if 'youtube.com' in u or 'youtu.be' in u or '影音' in title:
+        return '🎬', '影音說明'
+    if 'padlet.com' in u:
+        return '📌', '數位看板'
+    if any(k in u for k in ['moocs', 'elearn', 'estudy']) or any(k in title for k in ['研習', '學習', '磨課師']):
+        return '🎓', '研習學習網'
+    return '🔗', '外部連結'
+
+def extract_clean_links(text):
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+    links = []
+    seen = set()
+
+    for idx, l in enumerate(lines):
+        raw_urls = re.findall(r'https?://[^\s)）>]+', l)
+        for raw in raw_urls:
+            url = clean_url(raw)
+            if not url or url in seen or len(url) < 10 or '.' not in get_domain(url):
+                continue
+            seen.add(url)
+
+            line_txt = l.replace(raw, '').strip()
+            line_txt = re.sub(r'^[一二三四五六七八九十\d\.\(（\)]+、?\s*', '', line_txt)
+            line_txt = re.sub(r'^[●✧★※◎\-]\s*', '', line_txt)
+            line_txt = re.sub(r'[★※✧]+$', '', line_txt).strip()
+
+            title = ''
+            if len(line_txt) >= 4 and not line_txt.startswith('http') and not line_txt.startswith('）'):
+                title = line_txt
+            elif idx > 0:
+                prev_line = lines[idx-1]
+                prev_line = re.sub(r'^[一二三四五六七八九十\d\.\(（\)]+、?\s*', '', prev_line)
+                prev_line = re.sub(r'^[●✧★※◎\-]\s*', '', prev_line)
+                prev_line = re.sub(r'[★※✧]+$', '', prev_line).strip()
+                if len(prev_line) >= 4 and not prev_line.startswith('http'):
+                    title = prev_line
+
+            if 'gifted.ntpc.edu.tw' in url:
+                title = '新北資優鑑定系統報名'
+            elif 'nias-school' in url:
+                continue
+
+            title = re.sub(r'^(表單連結|連結|網址)[：:]\s*', '', title)
+            title = re.sub(r'^[）\)]\s*', '', title)
+            title = re.sub(r'[：:]\s*$', '', title).strip()
+            if not title:
+                title = '相關參考連結'
+            if len(title) > 60:
+                title = title[:60] + '…'
+
+            icon, cat = get_icon(url, title)
+            domain = get_domain(url)
+            links.append({
+                'url': url,
+                'title': title,
+                'category': cat,
+                'icon': icon,
+                'domain': domain
+            })
+    return links
+
 def enrich_meeting(m):
-    """提取學年度、週次、處室標籤與條列式核心摘要"""
+    """提取學年度、週次、處室標籤與提煉本次會議各項連結"""
     text = m.get("text", "")
     lines = [l.strip() for l in text.split("\n") if l.strip()]
     
@@ -67,43 +142,10 @@ def enrich_meeting(m):
         ay = roc_y if mo >= 8 else roc_y - 1
         academic_year = f"{ay}學年度 {sem}"
 
-    # 抽取重點
-    summary_items = []
-    in_chair = False
-    in_dept = False
-    current_dept = None
-    
-    for l in lines:
-        if re.search(r'[伍肆參]、\s*(?:主席|校長)報告', l):
-            in_chair = True
-            in_dept = False
-            continue
-        elif re.search(r'[陸伍柒]、\s*處室報告', l):
-            in_chair = False
-            in_dept = True
-            continue
-        elif re.search(r'[柒陸捌]、\s*(?:討論事項|臨時動議|散會)', l):
-            in_chair = False
-            in_dept = False
-            continue
-            
-        if in_chair and re.match(r'^[一二三四五六七八九十]、', l):
-            clean = re.sub(r'^[一二三四五六七八九十]、\s*', '', l)
-            if len(clean) > 6:
-                summary_items.append({"category": "校長/主席", "text": clean[:85]})
-        elif in_dept:
-            for dept in KNOWN_DEPTS:
-                if f"【{dept}】" in l or f"{dept}報告" in l:
-                    current_dept = dept
-            if current_dept and re.match(r'^[一二三四五六七八九十]、', l):
-                clean = re.sub(r'^[一二三四五六七八九十]、\s*', '', l)
-                if len(clean) > 6 and not any(s["category"] == current_dept and len(s["text"]) > 0 for s in summary_items if s["category"] == current_dept):
-                    summary_items.append({"category": current_dept, "text": clean[:85]})
-
     m["academic_year"] = academic_year
     m["week"] = week_str
     m["tags"] = tags
-    m["summary"] = summary_items[:6]
+    m["links"] = extract_clean_links(text)
     return m
 
 def optimize_pdf(pdf_path):

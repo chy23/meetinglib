@@ -13,38 +13,77 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "感謝所有夥伴讚颱風來臨前，協助防颱相關措施，學校才能將損害減至最小。也感謝週二 協助只保孩子們清理校園，恢復乾淨整齊的學習場域。"
-      },
-      {
-        "category": "校長/主席",
-        "text": "學務處已發下防空避難路線圖，有機會再請大家帶領孩子走一次相關路線，以防萬一，感 謝大家!"
-      },
-      {
-        "category": "校長/主席",
-        "text": "分享運用人質學 Rudolf Steiner12 感官解決教育問題的方法示例 (一) https://www.anthroposophyyilan.org.tw/lear"
-      },
-      {
-        "category": "教務處",
-        "text": "「115 學年度公開授課」行事曆已公告在校網首頁[公開授課專區]，請各位教師依時程 辦理；完成公開授課後請將資料直接上傳到[公開授課專區]裡的[已完成上傳區]。 二、 校"
-      },
-      {
-        "category": "學務處",
-        "text": "本週注意事項－生教組會加強宣導，也想請老師幫忙留意，感謝老師們。 (一) 下課或吃完飯時，同學們在校園的各個角落請放慢速度，注意安全，避免發生碰撞， 保持與他人的安全距離"
-      },
-      {
-        "category": "輔導處",
-        "text": "10/28 (三) 特教輔導專題研討："
-      }
-    ],
     "images": [
       "data/images/1-1_B3Cv2V_K6JFqlosLSzpUWyzfkLQ9w/img_1.jpg",
       "data/images/1-1_B3Cv2V_K6JFqlosLSzpUWyzfkLQ9w/img_2.jpg",
       "data/images/1-1_B3Cv2V_K6JFqlosLSzpUWyzfkLQ9w/img_3.jpg",
       "data/images/1-1_B3Cv2V_K6JFqlosLSzpUWyzfkLQ9w/img_4.jpg",
       "data/images/1-1_B3Cv2V_K6JFqlosLSzpUWyzfkLQ9w/img_5.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://www.anthroposophyyilan.org.tw/learn/anthroposophy/index.php?object=389",
+        "title": "分享運用人質學 Rudolf Steiner12 感官解決教育問題的方法示例 (一)  )",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "anthroposophyyilan.org.tw"
+      },
+      {
+        "url": "https://padlet.com/deer30629/padlet-s0242z18q5bwy0klcc8r",
+        "title": "資訊小教室",
+        "category": "數位看板",
+        "icon": "📌",
+        "domain": "padlet.com"
+      },
+      {
+        "url": "https://estudy.ntpc.edu.tw",
+        "title": "－使用校務行政 系統帳號登入。",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "estudy.ntpc.edu.tw"
+      },
+      {
+        "url": "https://moocs.moe.edu.tw/moocs/#/home",
+        "title": "－ 使用教育雲端帳號或使用縣市帳號登入。 ● E 等公務園+學習平台",
+        "category": "雲端資源",
+        "icon": "📁",
+        "domain": "moocs.moe.edu.tw"
+      },
+      {
+        "url": "https://elearn.hrd.gov.tw/mooc/index.php",
+        "title": "相關參考連結",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearn.hrd.gov.tw"
+      },
+      {
+        "url": "https://elearning.taipei",
+        "title": "台北 e 大",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearning.taipei"
+      },
+      {
+        "url": "https://forms.gle/A6d2m7JMRYYZ17kb9，以作為日後檢討與改進，再次感謝您們",
+        "title": "全校防災避難疏散演練順利完成，感謝老師們辛苦的指導與協助！  如有任何建議，將於 12/2(三)請各學年協助討論有無建議…",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://forms.gle/AYL7Wi519sAmz3s68",
+        "title": "掃具目前為線上表單填寫()，若有急需可以派小 朋友於下課時間到學務處衛生組找我~~",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://forms.gle/CQAUPDFmmWh6e5yQ6",
+        "title": "線上報名",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      }
     ]
   },
   {
@@ -61,28 +100,6 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "感謝防災協助安全防護、避難疏散、搶救、通報、緊急救護的各組夥伴們，有大家的投 入，學校遇到災害才更有防護能力，也謝謝帶領孩子的所有夥伴。"
-      },
-      {
-        "category": "校長/主席",
-        "text": "颱風即將來臨，秋颱的破壞能力不容小覷，讓我們提早準備，將災害減至最小! 三、本周繼續分享 Rudolf Steiner 提出人的感官有１２種"
-      },
-      {
-        "category": "教務處",
-        "text": "「115 學年度公開授課」行事曆已公告在校網首頁[公開授課專區]，請各位教師依時程 辦理；完成後請將資料直接上傳到[公開授課專區]裡的[已完成上傳區]。 二、 校外人士進"
-      },
-      {
-        "category": "學務處",
-        "text": "本週注意事項－生教組會加強宣導，也想請老師幫忙留意，感謝老師們。 (一)近期發現校園中常常出現人為垃圾，請老師在協助提醒學生在校園中不要邊走邊吃，如  果是自己吃完的垃圾"
-      },
-      {
-        "category": "輔導處",
-        "text": "10/22 (四) 下午 13：30 起於輔導處召開「10 月份輔導教師會議暨特教鑑定後確認輔導  與家庭支持需求會議」，上週已發下開會通知單，請相關教師預留時間與會。"
-      }
-    ],
     "images": [
       "data/images/1MtRmTvrHkkUPLAEn74Ldncjk8rwx3yyL/img_1.jpg",
       "data/images/1MtRmTvrHkkUPLAEn74Ldncjk8rwx3yyL/img_2.jpg",
@@ -93,6 +110,57 @@
       "data/images/1MtRmTvrHkkUPLAEn74Ldncjk8rwx3yyL/img_7.jpg",
       "data/images/1MtRmTvrHkkUPLAEn74Ldncjk8rwx3yyL/img_8.jpg",
       "data/images/1MtRmTvrHkkUPLAEn74Ldncjk8rwx3yyL/img_9.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://www.anthroposophyyilan.org.tw/learn/anthroposophy/index.php?object=389",
+        "title": "到１４歲的中階感官：嗅覺、味覺、視覺、溫暖覺",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "anthroposophyyilan.org.tw"
+      },
+      {
+        "url": "https://padlet.com/deer30629/padlet-s0242z18q5bwy0klcc8r",
+        "title": "資訊小教室",
+        "category": "數位看板",
+        "icon": "📌",
+        "domain": "padlet.com"
+      },
+      {
+        "url": "https://estudy.ntpc.edu.tw",
+        "title": "－使用校務行政系 統帳號登入。",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "estudy.ntpc.edu.tw"
+      },
+      {
+        "url": "https://moocs.moe.edu.tw/moocs/#/home－使用",
+        "title": "教育雲端帳號或使用縣市帳號登入。",
+        "category": "雲端資源",
+        "icon": "📁",
+        "domain": "moocs.moe.edu.tw"
+      },
+      {
+        "url": "https://elearn.hrd.gov.tw/mooc/index.php",
+        "title": "E 等公務園+學習平台",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearn.hrd.gov.tw"
+      },
+      {
+        "url": "https://elearning.taipei",
+        "title": "台北 e 大",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearning.taipei"
+      },
+      {
+        "url": "https://reurl.cc/Xx9rnj",
+        "title": "相關參考連結",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "reurl.cc"
+      }
     ]
   },
   {
@@ -109,37 +177,76 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "周一防災路線演練感謝所有夥伴協助，學生在短時間內就能井然有序地到達操場集結處， 在重要時刻能盡可能保障己身的安全。接下來會有實際演廖及防空避難路線，再請大家幫 忙，感謝!"
-      },
-      {
-        "category": "校長/主席",
-        "text": "學校每天幾乎都有流感及腸病毒通報，請大家能夠提醒孩子養成良好的衛生習慣及正確的 防疫知能，避免交互感染，謝謝!"
-      },
-      {
-        "category": "校長/主席",
-        "text": "最近個人接觸有關於身心靈的學習理論，將分數周分享，提供大家參考，一同幫助孩子能 在身心靈穩定的狀況下成長 (取自 十二感官奠基身心成長的平衡"
-      },
-      {
-        "category": "教務處",
-        "text": "「115 學年度公開授課」行事曆已公告在校網首頁[公開授課專區]，請各位教師依時程 辦理。"
-      },
-      {
-        "category": "學務處",
-        "text": "本週注意事項－生教組會加強宣導，也想請老師幫忙留意，感謝老師們。 (一) 下課或吃完飯時，同學們在校園的各個角落請放慢速度，注意安全，避免發生碰撞 ，保持與他人的安全距離"
-      },
-      {
-        "category": "輔導處",
-        "text": "本周六(10/17) 上午 09：00～11：00 於視聽館辦理「新北築家好-幸福家庭 123 宣導」親   職講座，敬請導師協助將活動訊息轉貼至班級群組，並鼓勵家長踴躍"
-      }
-    ],
     "images": [
       "data/images/1VwbOEWzcItCuegFx3gvBizWS86P5DznT/img_1.jpg",
       "data/images/1VwbOEWzcItCuegFx3gvBizWS86P5DznT/img_2.jpg",
       "data/images/1VwbOEWzcItCuegFx3gvBizWS86P5DznT/img_3.jpg",
       "data/images/1VwbOEWzcItCuegFx3gvBizWS86P5DznT/img_4.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://www.anthroposophyyilan.org.tw/learn/anthroposophy/index.php?object=389",
+        "title": "最近個人接觸有關於身心靈的學習理論，將分數周分享，提供大家參考，一同幫助孩子能 在身心靈穩定的狀況下成長 (取自 十二感…",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "anthroposophyyilan.org.tw"
+      },
+      {
+        "url": "https://forms.gle/rndkFMoZFrrYmkuR8",
+        "title": "凱基慈善基金會受理高級中等以下學校學生暨家庭急難救助申請案，無截止日。 (五) 華夏福箱申請填寫表單（扣除低收及中低收尚…",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://padlet.com/deer30629/padlet-s0242z18q5bwy0klcc8r",
+        "title": "資訊小教室",
+        "category": "數位看板",
+        "icon": "📌",
+        "domain": "padlet.com"
+      },
+      {
+        "url": "https://estudy.ntpc.edu.tw",
+        "title": "新 北 市 教 育 局 數 位 學 習 影 音 網  －使用校務行 政系統帳號登入。",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "estudy.ntpc.edu.tw"
+      },
+      {
+        "url": "https://moocs.moe.edu.tw/moocs/#/home－",
+        "title": "教 育 部 磨 課 師 平 臺  使用教育雲端帳號或使用縣市帳號登入。 ● E 等 公 務 園 + 學 習 平 台 ht…",
+        "category": "雲端資源",
+        "icon": "📁",
+        "domain": "moocs.moe.edu.tw"
+      },
+      {
+        "url": "https://elearn.hrd.gov.tw/mooc/index.php",
+        "title": "教 育 部 磨 課 師 平 臺 https://moocs.moe.edu.tw/moocs/#/home－ 使用教育雲…",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearn.hrd.gov.tw"
+      },
+      {
+        "url": "https://elearning.taipei",
+        "title": "教 育 部 磨 課 師 平 臺 https://moocs.moe.edu.tw/moocs/#/home－ 使用教育雲…",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearning.taipei"
+      },
+      {
+        "url": "https://moocs.moe.edu.tw/moocs/＃/home、E",
+        "title": "老師們可以利用教育部磨課師平臺  等公務 園+學習平台 https://elearn.hrd.gov.tw/mooc/i…",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "moocs.moe.edu.tw"
+      },
+      {
+        "url": "https://forms.gle/MagM9hxxz7uycBgVA",
+        "title": "線上報名",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      }
     ]
   },
   {
@@ -156,36 +263,68 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "感謝大家對於學校的付出，讓本市議員們對學校有所肯定，學校預算審查，已順利經議會 通過，明年經費無虞。"
-      },
-      {
-        "category": "校長/主席",
-        "text": "季節轉換，行政班級事務繁多，難免會影響身心。請大家記得察覺自己身心狀況，適時調 適。若有餘力，請多協助孩子，尤其是氣候一變，就常生病或脾氣暴躁、散發出憂鬱氣息 的孩子，謝"
-      },
-      {
-        "category": "校長/主席",
-        "text": "學校近來工程陸續招標出去，會有許多不便之處，請大家以孩子安全為優先考量，不便之 處敬請大家見諒!"
-      },
-      {
-        "category": "校長/主席",
-        "text": "祝福 10 月出生的夥伴生日快樂!"
-      },
-      {
-        "category": "教務處",
-        "text": "「115 學年度公開授課」行事曆已公告在校網首頁[公開授課專區]，請各位教師依時程 辦理。"
-      },
-      {
-        "category": "學務處",
-        "text": "本週注意事項－生教組會加強宣導，也想請老師幫忙留意，感謝老師們。 (一) 下課時，同學們在操場需放慢速度，注意安全，避免發生碰撞，保持與他人的安全距 離。"
-      }
-    ],
     "images": [
       "data/images/1EDiqKF-O_69hJ8-avgTXy66HvuuJXo2K/img_1.jpg",
       "data/images/1EDiqKF-O_69hJ8-avgTXy66HvuuJXo2K/img_2.jpg",
       "data/images/1EDiqKF-O_69hJ8-avgTXy66HvuuJXo2K/img_3.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://forms.gle/rndkFMoZFrrYmkuR8",
+        "title": "凱基慈善基金會受理高級中等以下學校學生暨家庭急難救助申請案，無截止日。 (八) 華夏福箱申請填寫表單（扣除低收及中低收尚…",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://estudy.ntpc.edu.tw",
+        "title": "新北市教育局數位學習影音網  －使用校務行政系統帳號登入。",
+        "category": "影音說明",
+        "icon": "🎬",
+        "domain": "estudy.ntpc.edu.tw"
+      },
+      {
+        "url": "https://moocs.moe.edu.tw/moocs/#/home－使用教育雲端帳",
+        "title": "教 育 部 磨 課 師 平 臺  號或使用縣市帳號登入。",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "moocs.moe.edu.tw"
+      },
+      {
+        "url": "https://elearn.hrd.gov.tw/mooc/index.php",
+        "title": "E 等公務園+學習平台",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearn.hrd.gov.tw"
+      },
+      {
+        "url": "https://elearning.taipei",
+        "title": "台北 e 大",
+        "category": "研習學習網",
+        "icon": "🎓",
+        "domain": "elearning.taipei"
+      },
+      {
+        "url": "https://reurl.cc/dOppqy（填寫僅需",
+        "title": "線上意願簽署連結： 1 分鐘，請同仁與家長務必於 時限內完成）。",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "reurl.cc"
+      },
+      {
+        "url": "https://forms.gle/MagM9hxxz7uycBgVA",
+        "title": "線上報名",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://atozwyc.pixnet.net/blog/posts/16094216000]",
+        "title": "[參考出處：王意中臨床心理師。取自",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "atozwyc.pixnet.net"
+      }
     ]
   },
   {
@@ -202,38 +341,13 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "開學至今已屆一個月，感謝所有夥伴的用心規畫及經營，讓班上趨於穩定，學生的學習迅 速進入狀況。"
-      },
-      {
-        "category": "校長/主席",
-        "text": "轉知區校長會議督學提醒事項"
-      },
-      {
-        "category": "校長/主席",
-        "text": "入秋養生的核心是「滋陰潤肺、預防秋燥」，因氣候由熱轉涼且空氣乾燥，易傷肺氣與津 液。(轉自 AI 資訊)"
-      },
-      {
-        "category": "教務處",
-        "text": "「115 學年度公開授課」行事曆已公告在校網首頁[公開授課專區]，請各位教師依時程 辦理。"
-      },
-      {
-        "category": "學務處",
-        "text": "本週注意事項－生教組會加強宣導，也想請老師幫忙留意，感謝老師們。 (一) 下課時，同學們在操場需放慢速度，注意安全，避免發生碰撞，保  持與他人的安全距離。"
-      },
-      {
-        "category": "輔導處",
-        "text": "9/30(三) 特教輔導專題研討："
-      }
-    ],
     "images": [
       "data/images/1oHotDBP-SNSZut5gN-VIMe_dM6BYwHCH/img_1.jpg",
       "data/images/1oHotDBP-SNSZut5gN-VIMe_dM6BYwHCH/img_2.jpg",
       "data/images/1oHotDBP-SNSZut5gN-VIMe_dM6BYwHCH/img_3.jpg",
       "data/images/1oHotDBP-SNSZut5gN-VIMe_dM6BYwHCH/img_4.jpg"
-    ]
+    ],
+    "links": []
   },
   {
     "id": "1QixBTWE-ZKjqvNgIdzebuXK4B9zxwngD",
@@ -250,32 +364,6 @@
       "總務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "開學至今，無論您身處何種職務，您都辛苦了，祝福所有夥伴教師節快樂！身心健康，教 學一切順利！"
-      },
-      {
-        "category": "校長/主席",
-        "text": "中秋節將近，祝福大家一切圓圓滿滿，事事如意！"
-      },
-      {
-        "category": "校長/主席",
-        "text": "近來有許多連假，大家不妨好好運用，適時休養生息，紓解一下各類壓力，讓自己可以邁 向更長遠的人生之路！"
-      },
-      {
-        "category": "教務處",
-        "text": "校內美術比賽："
-      },
-      {
-        "category": "學務處",
-        "text": "本週注意事項－生教組會加強宣導，也想請老師幫忙留意，感謝老師們。 (一)學生除棒球隊的學生練習，其餘時間禁止在任何地方丟棒球、紙球等。 (二)學生禁止從高處丟任何東西。"
-      },
-      {
-        "category": "總務處",
-        "text": "9/22(二)發下各班註冊費繳費項目，請導師確認以下事項，9/29(二)繳回出納組： (一)班級學生名單是否正確。"
-      }
-    ],
     "images": [
       "data/images/1QixBTWE-ZKjqvNgIdzebuXK4B9zxwngD/img_1.jpg",
       "data/images/1QixBTWE-ZKjqvNgIdzebuXK4B9zxwngD/img_2.jpg",
@@ -286,6 +374,22 @@
       "data/images/1QixBTWE-ZKjqvNgIdzebuXK4B9zxwngD/img_7.jpg",
       "data/images/1QixBTWE-ZKjqvNgIdzebuXK4B9zxwngD/img_8.jpg",
       "data/images/1QixBTWE-ZKjqvNgIdzebuXK4B9zxwngD/img_9.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://forms.gle/kgwrSVq2goiVpqhB6",
+        "title": "若班級有需要增加垃圾桶，也可以填寫以下表單申請",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "http://gifted.ntpc.edu.tw",
+        "title": "新北資優鑑定系統報名",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "gifted.ntpc.edu.tw"
+      }
     ]
   },
   {
@@ -302,37 +406,27 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "感謝所有於家長日用心規劃、準備、報告、溝通的夥伴，因為有您，家長能更了解如何與 老師共同合作，來幫助孩子成長和學習，謝謝您!"
-      },
-      {
-        "category": "校長/主席",
-        "text": "本周一早上學校大門附近發生行人違規穿越馬路造成機車車禍事宜，幸好不是本校孩子穿 越，受傷的也非本校學童。感謝大家指導孩子行走及搭乘任何交通工具的安全事宜，才能 避免相關的"
-      },
-      {
-        "category": "校長/主席",
-        "text": "天氣漸涼，氣候稍嫌不穩定，提醒您適當穿脫衣物，以維身體健康!"
-      },
-      {
-        "category": "教務處",
-        "text": "公開授課：請各位教師於 9/18(五)下班前完成「115 學年度公開授課」填報，俟教學組彙 整後公告轉知教師辦理流程與表格等相關事宜，並依時程辦理。(填報路徑：校務行政系"
-      },
-      {
-        "category": "學務處",
-        "text": "防制學生藥物濫用入班宣導"
-      },
-      {
-        "category": "輔導處",
-        "text": "9/12(六)二～六年級家長日：感謝全體教師及行政同仁協力與配合，使活動順利圓滿完  成。請各班導師於 9/18（五）前將家長日會議紀錄交回輔導處，感謝大家的協助。"
-      }
-    ],
     "images": [
       "data/images/1Cdd5GpbnfUyMvFrdAbtZbCJWK9wz978M/img_1.jpg",
       "data/images/1Cdd5GpbnfUyMvFrdAbtZbCJWK9wz978M/img_2.jpg",
       "data/images/1Cdd5GpbnfUyMvFrdAbtZbCJWK9wz978M/img_3.jpg",
       "data/images/1Cdd5GpbnfUyMvFrdAbtZbCJWK9wz978M/img_4.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://wp.me/pdx2oo-1Pf",
+        "title": "本活動當天眾多的「趣味遊戲」、「闖關活動」、「手作 DIY 體驗(免費/付費)」、「蝴蝶生態 及寄主植物觀察」等活動，詳…",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "wp.me"
+      },
+      {
+        "url": "http://gifted.ntpc.edu.tw",
+        "title": "新北資優鑑定系統報名",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "gifted.ntpc.edu.tw"
+      }
     ]
   },
   {
@@ -349,32 +443,6 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "感謝所有參與防災研習的所有夥伴，更謝謝規劃處組及各分組組長的用心，謝謝大家一起 守護孩子的安全。"
-      },
-      {
-        "category": "校長/主席",
-        "text": "佳節將近! 為感謝各位夥伴的用心，本校家長會汪睿翃會長特別自掏腰包，贈送所有夥伴 禮盒一盒，祝福大家中秋節快樂! 教師節快樂!"
-      },
-      {
-        "category": "校長/主席",
-        "text": "祝福 8、9 月出生的夥伴生日快樂! (因為人事主任異動，尚未收到新的名冊，若有遺漏， 敬請見諒!)"
-      },
-      {
-        "category": "教務處",
-        "text": "公開授課：請各位教師於 9/18(五)下班前完成「115 學年度公開授課」填報，俟教學組彙 整後公告轉知教師辦理流程與表格等相關事宜，並依時程辦理。(填報路徑：校務行政系"
-      },
-      {
-        "category": "學務處",
-        "text": "防制學生藥物濫用入班宣導"
-      },
-      {
-        "category": "輔導處",
-        "text": "9/12(六)8:00-12:00 舉辦二～六年級家長日：  (一) 已發下家長邀請函，回條請教師自行留存即可。"
-      }
-    ],
     "images": [
       "data/images/1RmBuT_LDzyt6Ip8XDl8gIX73IZckxf6b/img_1.jpg",
       "data/images/1RmBuT_LDzyt6Ip8XDl8gIX73IZckxf6b/img_2.jpg",
@@ -385,6 +453,36 @@
       "data/images/1RmBuT_LDzyt6Ip8XDl8gIX73IZckxf6b/img_7.jpg",
       "data/images/1RmBuT_LDzyt6Ip8XDl8gIX73IZckxf6b/img_8.jpg",
       "data/images/1RmBuT_LDzyt6Ip8XDl8gIX73IZckxf6b/img_9.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://forms.gle/1BDGyf9jpS8pnmLC9",
+        "title": "申請方式：請填表單  (以時間戳記取前 12 個名 額)",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://forms.gle/tcycQsMakFmUbdwFA",
+        "title": "115 學年度清寒原住民學生助學金申請連結",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://meet.google.com/ave-agdx-hcj",
+        "title": "下週一(9/14)兒童朝會採線上方式進行，請各班導師於上午 8:00 前進入 google meet 會議 室，會議室代…",
+        "category": "線上會議",
+        "icon": "📹",
+        "domain": "meet.google.com"
+      },
+      {
+        "url": "https://drive.google.com/drive/folders/1mjbB-KP9yL4cNtlA4xUJAitzP57RPcEi",
+        "title": "115-1 教育局家長日宣導相關資源，提供老師參酌運用。",
+        "category": "雲端資源",
+        "icon": "📁",
+        "domain": "drive.google.com"
+      }
     ]
   },
   {
@@ -401,37 +499,69 @@
       "學務處",
       "輔導處"
     ],
-    "summary": [
-      {
-        "category": "校長/主席",
-        "text": "感謝全程參與教室專業發展研習的所有夥伴，現今的環境就是需要大家彼此協助，給予對 方建議及支持，唯有專業，才能讓大家與時俱進，讓學生及家長更敬重自己! 二、規劃與協助新生歡"
-      },
-      {
-        "category": "校長/主席",
-        "text": "周一第一次午餐後的放學感謝學務處夥伴及二年級教師的協助，慧怡老師做了最良好、最 完整的示範，感謝她一直在穿堂協助等家長的孩子、並等待最後一個學生順利離校才離開 穿堂，期待"
-      },
-      {
-        "category": "校長/主席",
-        "text": "研習資訊分享，希望我們都能透過研習及互助，來提升自己的專業"
-      },
-      {
-        "category": "教務處",
-        "text": "本土語課師資場地安排如下：9/4(五)為本學年第一次上選修本土語課，請導師提醒孩子 到安排的教室上課，一年級新生請提早於下課時間到教務處前集合。"
-      },
-      {
-        "category": "學務處",
-        "text": "戶外教育：若有戶外教育相關訊息或優惠專案將公告於校網，老師可逕自上網查詢。  五、弦樂團招生：9/3(四)晚上 7:00 於視聽館舉行招生說明會。"
-      },
-      {
-        "category": "輔導處",
-        "text": "8/29 一年級迎新活動圓滿完成"
-      }
-    ],
     "images": [
       "data/images/1IExKccTvGuPabojSYbii2NucIyXP8S7B/img_1.jpg",
       "data/images/1IExKccTvGuPabojSYbii2NucIyXP8S7B/img_2.jpg",
       "data/images/1IExKccTvGuPabojSYbii2NucIyXP8S7B/img_3.jpg",
       "data/images/1IExKccTvGuPabojSYbii2NucIyXP8S7B/img_4.jpg"
+    ],
+    "links": [
+      {
+        "url": "https://www.youtube.com/watch?v=MBrSa1DeIoE",
+        "title": "發下 1-6 年級舊生 115-1 早餐券，亦可直接使用新北兒童卡領取，家長版使用方式可 傳連結供家長參閱",
+        "category": "影音說明",
+        "icon": "🎬",
+        "domain": "youtube.com"
+      },
+      {
+        "url": "https://docs.google.com/forms/d/1QkiZVXksjVxIdKjYCrhdJrPSHfPmjt2gfYw3HEtkOKs/edit",
+        "title": "若家長無法檢附家庭突發因素證明者，再請導師填寫家庭訪視紀錄",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "docs.google.com"
+      },
+      {
+        "url": "https://docs.google.com/forms/d/1dAbaNcJ8O663Slm6hJ2r5ymzw0ctw_8qYmwLnkgYq7Y/edit",
+        "title": "獎助學金：(同步公告校網&教師群組&plan→18_公文轉知→教務處→註冊組) (一) 115 學年度第 1 學期財團法…",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "docs.google.com"
+      },
+      {
+        "url": "https://forms.gle/4nWzpQ9sdFx62dCy8",
+        "title": "115 學年度多元閱讀刊物表單，請導師於 09/02(三)下午 4 點前填報完成。謝謝！表單連 結",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://meet.google.com/ave-agdx-hcj",
+        "title": "下週一(9/7)兒童朝會採線上方式進行，請各班導師於上午 8:00 前進入 google meet 會議室，會議室代碼：…",
+        "category": "線上會議",
+        "icon": "📹",
+        "domain": "meet.google.com"
+      },
+      {
+        "url": "https://forms.gle/uDGMeoG9tp6m3Yh58",
+        "title": "若是全學年戶外教育或班級退餐則還是維持填報或去午秘那邊填單。  (盡量 14:00 前完成)",
+        "category": "線上表單",
+        "icon": "📝",
+        "domain": "forms.gle"
+      },
+      {
+        "url": "https://reurl.cc/qa0j7g",
+        "title": "預計 9/3(四)發下一、四年級健康檢查同意書，請於 9/11(五)前收齊繳回健康中心。 4. 體位、視力預約排程表登記…",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "reurl.cc"
+      },
+      {
+        "url": "http://gifted.ntpc.edu.tw",
+        "title": "新北資優鑑定系統報名",
+        "category": "外部連結",
+        "icon": "🔗",
+        "domain": "gifted.ntpc.edu.tw"
+      }
     ]
   }
 ]
