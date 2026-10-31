@@ -57,53 +57,27 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root {
-    /* 淺色模式：Apple 現代溫潤暖灰與經典藍調 */
-    --bg: #f8f6f2;
+    /* 溫潤護眼圖書館紙質風格（經典清晰配色） */
+    --bg: #f8f6f0;
     --panel: #ffffff;
     --panel-elevated: #ffffff;
-    --panel-sub: #f5f3ec;
-    --ink: #1d1d1f;
-    --ink-light: #48484a;
-    --muted: #86868b;
+    --panel-sub: #fdfbf7;
+    --ink: #202428;
+    --ink-light: #525960;
+    --muted: #7b838b;
     --accent: #2e5c8a;
     --accent-light: #e8f0f8;
     --accent-dark: #1d3d5e;
     --warm: #8b5e34;
     --warm-bg: #fdf5ea;
-    --line: #e5e2d8;
+    --line: #e6e2d8;
     --line-light: #f0ece3;
-    --glass-bg: rgba(255, 255, 255, 0.82);
-    --glass-border: rgba(255, 255, 255, 0.65);
     --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
     --radius-sm: 8px;
     --radius-md: 12px;
-    --radius-lg: 18px;
+    --radius-lg: 16px;
     --pdf-zoom: 1.0;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      /* 深色模式：Apple HIG Base & Elevated 語意層次 */
-      --bg: #000000;
-      --panel: #1c1c1e;
-      --panel-elevated: #2c2c2e;
-      --panel-sub: #252528;
-      --ink: #f5f5f7;
-      --ink-light: #aeaeb2;
-      --muted: #8e8e93;
-      --accent: #2997ff;
-      --accent-light: rgba(41, 151, 255, 0.16);
-      --accent-dark: #70baff;
-      --warm: #f59e0b;
-      --warm-bg: rgba(245, 158, 11, 0.18);
-      --line: #38383a;
-      --line-light: #2c2c2e;
-      --glass-bg: rgba(28, 28, 30, 0.85);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-      --shadow-md: 0 6px 20px rgba(0,0,0,0.45);
-    }
   }
 
   * {
@@ -112,7 +86,7 @@
   }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: var(--bg);
@@ -129,15 +103,13 @@
     transform: scale(0.96);
   }
 
-  /* 頂部導航列 Header (Apple Liquid Glass 材質 + Safe Area 支援) */
+  /* 頂部導航列 Header */
   header {
     height: calc(60px + env(safe-area-inset-top, 0px));
     padding-top: env(safe-area-inset-top, 0px);
     padding-left: max(20px, env(safe-area-inset-left));
     padding-right: max(20px, env(safe-area-inset-right));
-    background: var(--glass-bg);
-    backdrop-filter: blur(25px) saturate(180%);
-    -webkit-backdrop-filter: blur(25px) saturate(180%);
+    background: #ffffff;
     border-bottom: 1px solid var(--line);
     display: flex;
     gap: 16px;
@@ -145,17 +117,13 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 1px 0 0 var(--glass-border) inset;
-    transition: background 0.25s, border-color 0.25s;
-  }
-    z-index: 100;
   }
   .brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    text-decoration: none;
-    color: var(--ink);
+    text-decoration: none !important;
+    color: var(--ink) !important;
     flex-shrink: 0;
   }
   .brand-icon {
@@ -173,11 +141,12 @@
     font-size: 17px;
     font-weight: 700;
     letter-spacing: 0.5px;
+    color: var(--ink) !important;
   }
   .brand small {
     display: block;
     font-size: 11px;
-    color: var(--muted);
+    color: var(--muted) !important;
     font-weight: 400;
   }
 
@@ -316,16 +285,14 @@
     letter-spacing: 0.5px;
   }
 
-  /* 抽屜內標題列 (Liquid Glass) */
+  /* 抽屜內標題列 */
   .nav-drawer-header {
     display: none;
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
     border-bottom: 1px solid var(--line);
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: var(--panel-sub);
   }
   .nav-drawer-title {
     font-size: 15px;
@@ -398,14 +365,6 @@
     font-weight: 500;
     transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
     touch-action: manipulation;
-  }
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    color: var(--ink-light);
-    white-space: nowrap;
-    cursor: pointer;
-    user-select: none;
   }
   .filter-pill.active {
     background: var(--accent);
@@ -1105,7 +1064,7 @@
     box-shadow: 0 2px 8px rgba(29, 111, 165, 0.35);
   }
 
-  /* 處室段落導航條（Apple Liquid Glass 材質，支援智慧懸浮） */
+  /* 處室段落導航條（支援智慧懸浮：往下滑隱藏、往上滑跳出） */
   .dept-jump-bar {
     display: flex;
     align-items: center;
@@ -1113,23 +1072,23 @@
     flex-wrap: wrap;
     margin-bottom: 20px;
     padding: 10px 16px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(253, 251, 247, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: var(--radius-sm);
     border: 1px solid var(--line);
     font-size: 13px;
     position: sticky;
     top: 10px;
     z-index: 80;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease, box-shadow 0.2s ease;
     will-change: transform, opacity;
   }
   .dept-jump-bar.is-floating {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: var(--line);
-    background: var(--glass-bg);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-color: #d8d2c4;
+    background: rgba(255, 255, 255, 0.96);
   }
   .dept-jump-bar.scroll-hidden {
     transform: translateY(-135%);
