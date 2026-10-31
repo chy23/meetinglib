@@ -1072,10 +1072,8 @@ async function show(id, kw = null, updateHash = true) {
 
         <!-- 動作工具列 -->
         <div class="toolbar">
-          <button class="tool-btn" onclick="copyShareLink()">🔗 複製分享連結</button>
           <a class="tool-btn" href="data/pdf/${cur.id}.pdf" download="${cur.date}_${cur.title}.pdf">📥 下載 PDF</a>
           <button class="tool-btn" onclick="window.print()">🖨️ 列印本篇</button>
-          <a class="tool-btn" href="${cur.url}" target="_blank" rel="noopener">☁️ 在 Google 雲端開啟 ↗</a>
         </div>
       </div>
 
@@ -1291,16 +1289,6 @@ async function jumpToBottom() {
     isProgrammaticScroll = false;
     lastMainScrollTop = $('main').scrollTop;
   }, 700);
-}
-
-// 複製分享連結
-function copyShareLink() {
-  const url = location.origin + location.pathname + '#' + cur.date;
-  navigator.clipboard.writeText(url).then(() => {
-    showToast('✅ 已複製本場會議分享連結！');
-  }).catch(() => {
-    showToast('複製失敗，連結：' + url);
-  });
 }
 
 // 複製外部連結網址
