@@ -249,7 +249,56 @@
     border-radius: 10px;
   }
 
+  /* 子項目：會議項目折疊結構 */
+  .sub-group {
+    margin: 4px 0 6px 6px;
+    border-left: 2px solid var(--line-light);
+    padding-left: 6px;
+  }
+  .sub-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-light);
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s, color 0.15s;
+  }
+  .sub-group-header:hover {
+    background: var(--panel-sub);
+    color: var(--ink);
+  }
+  .sub-group-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sub-group-header .chevron {
+    transition: transform 0.2s;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .sub-group.collapsed .sub-group-header .chevron {
+    transform: rotate(-90deg);
+  }
+  .sub-group.collapsed .sub-group-list {
+    display: none;
+  }
+  .sub-group-count {
+    font-size: 11px;
+    background: var(--bg);
+    color: var(--muted);
+    border: 1px solid var(--line-light);
+    padding: 1px 6px;
+    border-radius: 8px;
+  }
+
   /* 會議清單條目 */
+  .sub-group-list { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
   .group-list { display: flex; flex-direction: column; gap: 4px; }
   .nav-item {
     display: block;
@@ -908,10 +957,8 @@ async function load() {
   const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
   let target = data.find(m => m.date === hash || m.id === hash);
   if (!target) {
-    // 預設開啟離今天最近的會議
-    const now = Date.now();
-    target = data.reduce((a, b) =>
-      Math.abs(new Date(b.date) - now) < Math.abs(new Date(a.date) - now) ? b : a);
+    // 每次開啟網頁預設開啟最新日期的會議
+    target = data.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
   }
   show(target.id);
 }
@@ -935,7 +982,25 @@ document.querySelectorAll('.filter-pill').forEach(pill => {
   };
 });
 
-// 渲染左側目錄（依學年度/月份折疊分組）
+// 辨識會議類別
+function getMeetingCategory(m) {
+  const cat = (m.category || '').trim();
+  const t = (m.title || '').trim();
+  const name = cat || t;
+  if (/校務會議/.test(name)) return { name: '校務會議', icon: '🏛️' };
+  if (/備課/.test(name)) return { name: '備課會議', icon: '📚' };
+  if (/教師午會|午會|晨會/.test(name)) return { name: '教師午會', icon: '📋' };
+  if (/行政會議/.test(name)) return { name: '行政會議', icon: '👥' };
+  if (/學年會議/.test(name)) return { name: '學年會議', icon: '🎓' };
+  if (/課發會|課程發展/.test(name)) return { name: '課程發展委員會', icon: '📖' };
+  if (/特推會|特殊教育/.test(name)) return { name: '特推會', icon: '🌱' };
+  if (/導師會議/.test(name)) return { name: '導師會議', icon: '🧑‍🏫' };
+  if (/考績|考核/.test(name)) return { name: '考績考核會', icon: '⚖️' };
+  const cleanName = name.replace(/(會議)?(紀錄|記錄)$/, '').trim() || name || '其他會議';
+  return { name: cleanName, icon: '📑' };
+}
+
+// 渲染左側目錄（學期主項目 ➔ 會議項目子項目 ➔ 各次會議列表）
 function renderNav() {
   const listEl = $('navList');
   let filtered = data;
@@ -961,9 +1026,55 @@ function renderNav() {
   let html = '';
   let groupIndex = 0;
   for (const [groupName, items] of Object.entries(groups)) {
-    const isFirst = groupIndex === 0;
+    // 依會議項目分組（子項目），只有真正有檔案的項目才會建立
+    const subCategories = {};
+    items.forEach(m => {
+      const cat = getMeetingCategory(m);
+      if (!subCategories[cat.name]) {
+        subCategories[cat.name] = { icon: cat.icon, items: [] };
+      }
+      subCategories[cat.name].items.push(m);
+    });
+
+    const hasCur = cur && items.some(m => m.id === cur.id);
+    const isGroupOpen = groupIndex === 0 || hasCur;
+
+    let subHtml = '';
+    for (const [catName, catData] of Object.entries(subCategories)) {
+      const hasCurSub = cur && catData.items.some(m => m.id === cur.id);
+      const isSubOpen = groupIndex === 0 || hasCurSub;
+
+      subHtml += `
+        <div class="sub-group ${isSubOpen ? '' : 'collapsed'}" data-category="${esc(catName)}">
+          <div class="sub-group-header" onclick="toggleSubGroup(this)">
+            <span class="sub-group-title">${catData.icon} ${esc(catName)}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span class="sub-group-count">${catData.items.length} 份</span>
+              <span class="chevron">▼</span>
+            </div>
+          </div>
+          <div class="sub-group-list">
+            ${catData.items.map(m => `
+              <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
+                <div class="nav-item-top">
+                  <span class="nav-item-title">${esc(m.title)}</span>
+                  ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
+                </div>
+                <span class="nav-item-date">📅 ${m.date}</span>
+                ${m.tags && m.tags.length ? `
+                  <div class="nav-item-badges">
+                    ${m.tags.slice(0, 4).map(t => `<span class="dept-badge ${t[0]}">${t.slice(0, 2)}</span>`).join('')}
+                  </div>
+                ` : ''}
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
     html += `
-      <div class="nav-group ${isFirst ? '' : ''}" data-group="${esc(groupName)}">
+      <div class="nav-group ${isGroupOpen ? '' : 'collapsed'}" data-group="${esc(groupName)}">
         <div class="group-header" onclick="toggleNavGroup(this)">
           <span>📁 ${esc(groupName)}</span>
           <div style="display:flex;align-items:center;gap:6px">
@@ -972,20 +1083,7 @@ function renderNav() {
           </div>
         </div>
         <div class="group-list">
-          ${items.map(m => `
-            <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
-              <div class="nav-item-top">
-                <span class="nav-item-title">${esc(m.title)}</span>
-                ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
-              </div>
-              <span class="nav-item-date">📅 ${m.date}</span>
-              ${m.tags && m.tags.length ? `
-                <div class="nav-item-badges">
-                  ${m.tags.slice(0, 4).map(t => `<span class="dept-badge ${t[0]}">${t.slice(0, 2)}</span>`).join('')}
-                </div>
-              ` : ''}
-            </a>
-          `).join('')}
+          ${subHtml}
         </div>
       </div>
     `;
@@ -997,6 +1095,11 @@ function renderNav() {
 function toggleNavGroup(headerEl) {
   const group = headerEl.closest('.nav-group');
   group.classList.toggle('collapsed');
+}
+
+function toggleSubGroup(headerEl) {
+  const subGroup = headerEl.closest('.sub-group');
+  subGroup.classList.toggle('collapsed');
 }
 
 // PDF.js 核心
@@ -1038,8 +1141,15 @@ async function show(id, kw = null, updateHash = true) {
   // 關閉手機抽屜
   toggleMenu(false);
 
-  // 選單標籤高亮
+  // 選單標籤高亮與展開對應的學期與會議項目子目錄
   document.querySelectorAll('.nav-item').forEach(a => a.classList.toggle('on', a.dataset.id === id));
+  const activeItem = document.querySelector(`.nav-item[data-id="${id}"]`);
+  if (activeItem) {
+    const parentSub = activeItem.closest('.sub-group');
+    if (parentSub) parentSub.classList.remove('collapsed');
+    const parentGroup = activeItem.closest('.nav-group');
+    if (parentGroup) parentGroup.classList.remove('collapsed');
+  }
 
   // 組合本次會議各項連結卡片 (Links Card)
   let linksHtml = '';

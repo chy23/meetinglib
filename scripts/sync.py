@@ -142,8 +142,29 @@ def enrich_meeting(m):
         ay = roc_y if mo >= 8 else roc_y - 1
         academic_year = f"{ay}學年度 {sem}"
 
+    # 會議分類（校務會議、備課會議、教師午會等）
+    title = m.get("title", "")
+    category = "教師午會"
+    if "校務會議" in title:
+        category = "校務會議"
+    elif "備課" in title:
+        category = "備課會議"
+    elif "行政會議" in title:
+        category = "行政會議"
+    elif "學年會議" in title:
+        category = "學年會議"
+    elif "課發會" in title or "課程發展" in title:
+        category = "課程發展委員會"
+    elif "特推會" in title or "特殊教育" in title:
+        category = "特推會"
+    elif "導師會議" in title:
+        category = "導師會議"
+    else:
+        category = re.sub(r'(會議)?(紀錄|記錄)$', '', title).strip() or title or "其他會議"
+
     m["academic_year"] = academic_year
     m["week"] = week_str
+    m["category"] = category
     m["tags"] = tags
     m["links"] = extract_clean_links(text)
     return m
