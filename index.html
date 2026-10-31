@@ -580,6 +580,28 @@
     transform: translateY(-1px);
     box-shadow: 0 2px 6px rgba(46,92,138,0.2);
   }
+  .dept-jump-pill.pill-link {
+    background: #fdf5ea;
+    border-color: #ebd9c3;
+    color: var(--warm);
+  }
+  .dept-jump-pill.pill-link:hover {
+    background: var(--warm);
+    color: #fff;
+    border-color: var(--warm);
+    box-shadow: 0 2px 6px rgba(139, 94, 52, 0.25);
+  }
+  .dept-jump-pill.pill-nav {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    color: var(--ink-light);
+  }
+  .dept-jump-pill.pill-nav:hover {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
 
   /* 原始 PDF 模式 (PDF Mode) */
   #pages {
@@ -977,19 +999,11 @@ async function show(id, kw = null, updateHash = true) {
   // 選單標籤高亮
   document.querySelectorAll('.nav-item').forEach(a => a.classList.toggle('on', a.dataset.id === id));
 
-  // 組合處室跳轉標籤
-  const deptTagsHtml = (cur.tags && cur.tags.length) ? `
-    <div class="dept-jump-bar">
-      <span>📍 處室快速跳轉：</span>
-      ${cur.tags.map(t => `<div class="dept-jump-pill" onclick="jumpToDept('${t}')">${t}</div>`).join('')}
-    </div>
-  ` : '';
-
   // 組合本次會議各項連結卡片 (Links Card)
   let linksHtml = '';
   if (cur.links && cur.links.length > 0) {
     linksHtml = `
-      <div class="links-card">
+      <div class="links-card" id="meetingLinksCard">
         <div class="links-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
           <span class="links-title">
             🔗 本次會議之各項連結與表單
@@ -1020,6 +1034,26 @@ async function show(id, kw = null, updateHash = true) {
       </div>
     `;
   }
+
+  // 組合處室快速跳轉導航列
+  const deptPills = (cur.tags && cur.tags.length)
+    ? cur.tags.map(t => `<div class="dept-jump-pill" onclick="jumpToDept('${t}')">${t}</div>`).join('')
+    : '';
+  const linksPill = (cur.links && cur.links.length > 0)
+    ? `<div class="dept-jump-pill pill-link" onclick="jumpToLinks()">🔗 本次會議之各項連結</div>`
+    : '';
+  const topPill = `<div class="dept-jump-pill pill-nav" onclick="jumpToTop()">⬆️ 回到頂端</div>`;
+  const bottomPill = `<div class="dept-jump-pill pill-nav" onclick="jumpToBottom()">⬇️ 移至末頁</div>`;
+
+  const deptTagsHtml = `
+    <div class="dept-jump-bar">
+      <span>📍 處室快速跳轉：</span>
+      ${deptPills}
+      ${linksPill}
+      ${topPill}
+      ${bottomPill}
+    </div>
+  `;
 
   // 建立主卡片
   $('main').innerHTML = `
@@ -1172,6 +1206,91 @@ async function jumpToDept(deptName) {
   } catch (e) {
     showToast(`定位失敗：${e.message}`);
   }
+}
+
+// 跳轉至本次會議之各項連結卡片
+function jumpToLinks() {
+  const card = $('meetingLinksCard') || document.querySelector('.links-card');
+  if (!card) {
+    showToast('本次會議無外部連結');
+    return;
+  }
+  const grid = card.querySelector('.links-grid');
+  if (grid && grid.classList.contains('collapsed')) {
+    grid.classList.remove('collapsed');
+  }
+  isProgrammaticScroll = true;
+  const bar = document.querySelector('.dept-jump-bar');
+  if (bar) bar.classList.remove('scroll-hidden');
+
+  const mainEl = $('main');
+  const mainRect = mainEl.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const scrollTarget = mainEl.scrollTop + (cardRect.top - mainRect.top) - 68;
+  mainEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+
+  card.style.outline = '3px solid var(--warm)';
+  card.style.boxShadow = '0 0 0 5px rgba(139, 94, 52, 0.2)';
+  setTimeout(() => {
+    card.style.outline = '';
+    card.style.boxShadow = '';
+  }, 2200);
+
+  setTimeout(() => {
+    isProgrammaticScroll = false;
+    lastMainScrollTop = mainEl.scrollTop;
+  }, 700);
+  showToast('已定位至各項連結');
+}
+
+// 快速回到頂端
+function jumpToTop() {
+  isProgrammaticScroll = true;
+  const bar = document.querySelector('.dept-jump-bar');
+  if (bar) {
+    bar.classList.remove('scroll-hidden');
+    bar.classList.remove('is-floating');
+  }
+  $('main').scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => {
+    isProgrammaticScroll = false;
+    lastMainScrollTop = 0;
+  }, 700);
+  showToast('已回到文件頂端');
+}
+
+// 快速移至末頁
+async function jumpToBottom() {
+  isProgrammaticScroll = true;
+  const bar = document.querySelector('.dept-jump-bar');
+  if (bar) bar.classList.remove('scroll-hidden');
+
+  const wraps = $('pages').querySelectorAll('.page');
+  if (wraps.length) {
+    const lastIdx = wraps.length;
+    const lastWrap = wraps[lastIdx - 1];
+    if (!lastWrap.dataset.done && window.pdfDrawPage) {
+      await window.pdfDrawPage(lastIdx, lastWrap);
+    }
+    const mainEl = $('main');
+    const mainRect = mainEl.getBoundingClientRect();
+    const wrapRect = lastWrap.getBoundingClientRect();
+    const scrollTarget = mainEl.scrollTop + (wrapRect.top - mainRect.top) - 68;
+    mainEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+
+    lastWrap.style.outline = '4px solid var(--accent)';
+    setTimeout(() => {
+      lastWrap.style.outline = '';
+    }, 2000);
+    showToast(`已移至末頁（第 ${lastIdx} 頁）`);
+  } else {
+    $('main').scrollTo({ top: $('main').scrollHeight, behavior: 'smooth' });
+    showToast('已移至文件末端');
+  }
+  setTimeout(() => {
+    isProgrammaticScroll = false;
+    lastMainScrollTop = $('main').scrollTop;
+  }, 700);
 }
 
 // 複製分享連結
