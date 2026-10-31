@@ -526,6 +526,60 @@
     text-decoration: underline;
   }
 
+  /* 純文字 ASCII 表格與圖片框框 */
+  .ascii-table-wrap {
+    margin: 18px 0;
+    background: #fdfbf7;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+  }
+  .ascii-table-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ascii-table {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: #1a202c;
+    overflow-x: auto;
+    white-space: pre;
+    padding: 4px 0;
+  }
+  .ascii-img-box {
+    margin: 14px 0;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .ascii-img-box:hover {
+    transform: translateY(-1px);
+  }
+  .ascii-img-box:hover .ascii-frame {
+    border-color: var(--accent);
+    background: #f0f7ff;
+    color: var(--accent-dark);
+  }
+  .ascii-frame {
+    margin: 0;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--warm);
+    background: var(--warm-bg);
+    border: 1px solid #ebd9c3;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    overflow-x: auto;
+    white-space: pre;
+  }
+
   /* 原始 PDF 模式 (PDF Mode) */
   #pages { width: 100%; display: none; }
   .page {
@@ -846,17 +900,131 @@ function toggleNavGroup(headerEl) {
   group.classList.toggle('collapsed');
 }
 
-// 格式化 OCR 純文字為易讀排版
+// 純文字寬度計算（中文字佔 2，英數佔 1）
+function textWidth(s) {
+  let w = 0;
+  for (let c of (s || '')) {
+    w += c.charCodeAt(0) > 127 ? 2 : 1;
+  }
+  return w;
+}
+
+// 以 +、- 與 | 組合出標準 ASCII 表格
+function formatAsciiTable(headers, rows) {
+  const cols = headers.length;
+  const widths = headers.map(h => textWidth(h));
+  rows.forEach(r => {
+    for (let idx = 0; idx < cols; idx++) {
+      const cell = r[idx] || '';
+      widths[idx] = Math.max(widths[idx], textWidth(cell));
+    }
+  });
+
+  const colPads = widths.map(w => Math.max(w, 4) + 2);
+  function pad(s, width) {
+    const tw = textWidth(s);
+    return (s || '') + ' '.repeat(Math.max(0, width - tw));
+  }
+
+  const sep = '+' + colPads.map(w => '-'.repeat(w)).join('+') + '+';
+  const headerLine = '|' + headers.map((h, i) => ' ' + pad(h, colPads[i] - 1)).join('|') + '|';
+
+  const lines = [sep, headerLine, sep];
+  rows.forEach(r => {
+    const rowLine = '|' + headers.map((_, i) => ' ' + pad(r[i] || '', colPads[i] - 1)).join('|') + '|';
+    lines.push(rowLine);
+  });
+  lines.push(sep);
+  return lines.join('\n');
+}
+
+// 圖片 ASCII 框線提示
+function formatAsciiImgBox(caption) {
+  const inner = `📷【原始公文附圖 / 照片】 ${caption || ''}`.trim();
+  const tw = textWidth(inner);
+  const width = Math.max(tw + 4, 60);
+  function pad(s, w) {
+    return (s || '') + ' '.repeat(Math.max(0, w - textWidth(s)));
+  }
+  const sep = '+' + '-'.repeat(width) + '+';
+  const l1 = '|  ' + pad(inner, width - 2) + '|';
+  const l2 = '|  ' + pad('👉 點此切換至【📑 完整圖文版】直接查看原始彩色照片與圖檔', width - 2) + '|';
+  return [sep, l1, l2, sep].join('\n');
+}
+
+// 常見學校公文表格標題特徵庫
+const KNOWN_TABLE_HEADERS = [
+  ['時間', '班級', '入班人員', '時間', '班級', '入班人員'],
+  ['時間', '班級', '入班人員'],
+  ['日 期', '時 間', '學 生', '地 點', '備註'],
+  ['日期', '時間', '學生', '地點', '備註'],
+  ['項目', '班級'],
+  ['類 別', '上 課 時 間', '年 級', '報名人數', '開班數', '開課日期'],
+  ['類別', '上課時間', '年級', '報名人數', '開班數', '開課日期'],
+  ['日期', '年級'],
+  ['日 期', '年 級'],
+];
+
+// 格式化 OCR 純文字為易讀排版（含 | 與 - 表格重建及圖片框框）
 function formatTextContent(rawText) {
   if (!rawText) return '<p class="text-line">（尚無文字內容）</p>';
-  const lines = rawText.split('\n');
+  const rawLines = rawText.split('\n').map(l => l.trim());
   let html = '';
+  let i = 0;
 
-  for (let line of lines) {
-    line = line.trim();
-    if (!line) continue;
+  while (i < rawLines.length) {
+    const line = rawLines[i];
+    if (!line) { i++; continue; }
 
-    // 大標題：壹、貳、參...
+    // 1. 偵測並以 | 與 - 重建表格
+    let matchedHeader = null;
+    for (let headers of KNOWN_TABLE_HEADERS) {
+      const hLen = headers.length;
+      if (i + hLen <= rawLines.length) {
+        const window = rawLines.slice(i, i + hLen);
+        if (window.map(w => w.replace(/\s+/g, '')).join(',') === headers.map(h => h.replace(/\s+/g, '')).join(',')) {
+          matchedHeader = headers;
+          break;
+        }
+      }
+    }
+
+    if (matchedHeader) {
+      const hLen = matchedHeader.length;
+      i += hLen;
+      const cols = (matchedHeader.length === 6 && matchedHeader[0] === '時間' && matchedHeader[3] === '時間') ? 3 : matchedHeader.length;
+      const dataCells = [];
+
+      while (i < rawLines.length) {
+        const candidate = rawLines[i];
+        if (!candidate) { i++; continue; }
+        // 遇到大標題、處室或明顯長段落則停止表格收集
+        if (/^[壹貳參肆伍陸柒捌玖拾]、|^【|^[一二三四五六七八九十]、|^※/.test(candidate) || candidate.length > 75) {
+          break;
+        }
+        dataCells.push(candidate);
+        i++;
+      }
+
+      const rows = [];
+      for (let k = 0; k < dataCells.length; k += cols) {
+        const chunk = dataCells.slice(k, k + cols);
+        if (chunk.length > 0) rows.push(chunk);
+      }
+
+      if (rows.length > 0) {
+        const asciiTable = formatAsciiTable(matchedHeader.slice(0, cols), rows);
+        html += `
+          <div class="ascii-table-wrap">
+            <div class="ascii-table-title">📊 重建表格（以 | 與 - 繪製）：</div>
+            <pre class="ascii-table">${esc(asciiTable)}</pre>
+          </div>
+        `;
+        continue;
+      }
+    }
+
+    // 2. 大標題：壹、貳、參...
     if (/^[壹貳參肆伍陸柒捌玖拾]、/.test(line)) {
       html += `<div class="text-section-title">${esc(line)}</div>`;
     }
@@ -869,12 +1037,26 @@ function formatTextContent(rawText) {
     else if (/^【.+】/.test(line)) {
       html += `<div class="text-subdept-title">${esc(line)}</div>`;
     }
-    // 一般段落與網址自動超連結
+    // 3. 一般文字段落
     else {
       let linked = esc(line).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
       html += `<div class="text-line">${linked}</div>`;
+
+      // 4. 偵測圖片關鍵字並畫出框框提示
+      if (/(?:附圖|如圖|圖片|照片|路線圖|示意圖|宣導圖|海報)/.test(line)) {
+        const caption = line.length < 35 ? line : '';
+        const asciiImg = formatAsciiImgBox(caption);
+        html += `
+          <div class="ascii-img-box" onclick="switchMode('pdf')" title="點此切換至完整圖文版查看原始圖片">
+            <pre class="ascii-frame">${esc(asciiImg)}</pre>
+          </div>
+        `;
+      }
     }
+
+    i++;
   }
+
   return html;
 }
 
