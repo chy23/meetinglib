@@ -973,7 +973,7 @@ let currentDeptFilter = '';
 let currentZoom = parseFloat(localStorage.getItem('pdfZoom') || '1.0');
 
 const $ = id => document.getElementById(id);
-const esc = s => (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc = s => (s || '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const reEsc = s => (s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 // Toast 提示訊息
@@ -1261,8 +1261,8 @@ async function show(id, kw = null, updateHash = true) {
                   <span class="link-domain">${esc(l.domain)}</span>
                 </div>
                 <div class="link-actions">
-                  <button class="btn-link-action" onclick="copyUrl('${esc(l.url)}')" title="複製連結網址">📋 複製</button>
-                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener" title="在新分頁開啟">開啟 ↗</a>
+                  <button class="btn-link-action" data-url="${esc(l.url)}" onclick="copyUrl(this.dataset.url)" title="複製連結網址">📋 複製</button>
+                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" title="在新分頁開啟">開啟 ↗</a>
                 </div>
               </div>
             </div>
