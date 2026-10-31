@@ -172,12 +172,76 @@
   }
   .menu-toggle {
     display: none;
-    font-size: 20px;
-    border: none;
-    background: transparent;
+    align-items: center;
+    gap: 6px;
+    background: #ffffff;
+    color: var(--accent-dark);
+    border: 1.5px solid var(--accent);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    padding: 6px;
+    box-shadow: 0 1.5px 5px rgba(29, 111, 165, 0.18);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .menu-toggle:hover {
+    background: var(--accent-light);
+  }
+  .menu-toggle:active {
+    transform: scale(0.96);
+  }
+  .menu-toggle.active {
+    background: var(--accent);
+    color: #ffffff;
+    border-color: var(--accent);
+    box-shadow: 0 2px 8px rgba(29, 111, 165, 0.35);
+  }
+  .menu-toggle-icon {
+    font-size: 15px;
+    line-height: 1;
+    font-weight: 900;
+  }
+  .menu-toggle-text {
+    letter-spacing: 0.5px;
+  }
+
+  /* 抽屜內標題列 */
+  .nav-drawer-header {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-sub);
+  }
+  .nav-drawer-title {
+    font-size: 14px;
+    font-weight: 700;
     color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-close-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--muted);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .nav-close-btn:hover {
+    color: var(--ink);
+    background: var(--bg);
   }
 
   /* 主版面佈局 */
@@ -798,7 +862,8 @@
   /* 手機與平板響應式設計 */
   @media (max-width: 820px) {
     header { padding: 0 14px; gap: 10px; }
-    .menu-toggle { display: block; }
+    .menu-toggle { display: inline-flex; }
+    .nav-drawer-header { display: flex; }
     .brand small { display: none; }
     .wrap { position: relative; }
     nav {
@@ -842,7 +907,10 @@
 <body>
 
 <header>
-  <button class="menu-toggle" id="menuToggle" aria-label="切換選單">☰</button>
+  <button class="menu-toggle" id="menuToggle" aria-label="切換會議目錄選單">
+    <span class="menu-toggle-icon">☰</span>
+    <span class="menu-toggle-text">會議目錄</span>
+  </button>
   <a class="brand" href="#">
     <div class="brand-icon">📚</div>
     <div>
@@ -870,6 +938,13 @@
 <div class="wrap">
   <div class="nav-backdrop" id="navBackdrop"></div>
   <nav id="nav">
+    <div class="nav-drawer-header">
+      <div class="nav-drawer-title">
+        <span>📚</span>
+        <span>會議目錄清單</span>
+      </div>
+      <button class="nav-close-btn" onclick="toggleMenu(false)" aria-label="關閉目錄">✕</button>
+    </div>
     <div class="filter-tags" id="filterTags">
       <div class="filter-pill active" data-dept="">全部</div>
       <div class="filter-pill" data-dept="教務處">教務處</div>
@@ -930,11 +1005,20 @@ $('zoomReset').onclick = () => { setZoom(1.0); showToast('已重設為標準寬�
 // 手機選單抽屜
 const nav = $('nav');
 const backdrop = $('navBackdrop');
+const menuToggle = $('menuToggle');
 function toggleMenu(open) {
-  nav.classList.toggle('open', open);
-  backdrop.classList.toggle('open', open);
+  const isOpen = typeof open === 'boolean' ? open : !nav.classList.contains('open');
+  nav.classList.toggle('open', isOpen);
+  backdrop.classList.toggle('open', isOpen);
+  if (menuToggle) {
+    menuToggle.classList.toggle('active', isOpen);
+    const icon = menuToggle.querySelector('.menu-toggle-icon');
+    const text = menuToggle.querySelector('.menu-toggle-text');
+    if (icon) icon.textContent = isOpen ? '✕' : '☰';
+    if (text) text.textContent = isOpen ? '關閉' : '會議目錄';
+  }
 }
-$('menuToggle').onclick = () => toggleMenu(!nav.classList.contains('open'));
+menuToggle.onclick = () => toggleMenu();
 backdrop.onclick = () => toggleMenu(false);
 
 // 初始化載入
