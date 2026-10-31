@@ -428,10 +428,42 @@
     cursor: pointer;
   }
   .links-grid {
-    margin-top: 12px;
+    margin-top: 10px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 10px;
+    gap: 8px;
+    transition: max-height 0.3s ease;
+  }
+  .links-grid.compact {
+    max-height: 120px;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: thin;
+  }
+  .links-grid.compact::-webkit-scrollbar {
+    width: 4px;
+  }
+  .links-grid.compact::-webkit-scrollbar-thumb {
+    background: #e2d9cc;
+    border-radius: 4px;
+  }
+  .links-expand-btn {
+    margin-top: 8px;
+    padding: 6px;
+    background: #fdf5ea;
+    border: 1px dashed #e2d2bf;
+    border-radius: var(--radius-sm);
+    color: var(--warm);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .links-expand-btn:hover {
+    background: #f7ebd9;
+    border-color: var(--warm);
   }
   .links-grid.collapsed { display: none; }
   .link-item {
@@ -735,16 +767,26 @@
     .nav-backdrop {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.3);
+      background: rgba(0,0,0,0.4);
       z-index: 80;
       display: none;
     }
     .nav-backdrop.open { display: block; }
-    main { padding: 16px 14px; }
-    .doc { padding: 18px 14px; }
+    main { padding: 12px 10px 40px; }
+    .doc { padding: 16px 14px; }
     .doc h2 { font-size: 20px; }
-    .doc-title-row { flex-direction: column; }
+    .doc-title-row { flex-direction: column; gap: 8px; }
     .zoom-controls { display: none; }
+    .dept-jump-bar {
+      top: 6px;
+      padding: 8px 10px;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .dept-jump-pill {
+      padding: 3px 10px;
+      font-size: 11.5px;
+    }
   }
 </style>
 </head>
@@ -1002,16 +1044,17 @@ async function show(id, kw = null, updateHash = true) {
   // 組合本次會議各項連結卡片 (Links Card)
   let linksHtml = '';
   if (cur.links && cur.links.length > 0) {
+    const hasMany = cur.links.length > 2;
     linksHtml = `
       <div class="links-card" id="meetingLinksCard">
-        <div class="links-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+        <div class="links-header" onclick="toggleLinksExpand()">
           <span class="links-title">
             🔗 本次會議之各項連結與表單
             <span class="links-badge">${cur.links.length} 個</span>
           </span>
-          <span class="links-toggle">收合 / 展開</span>
+          <span class="links-toggle" id="linksHeaderToggle">${hasMany ? '展開全部 ▼' : '收合 ▲'}</span>
         </div>
-        <div class="links-grid">
+        <div class="links-grid ${hasMany ? 'compact' : ''}" id="linksGrid">
           ${cur.links.map(l => `
             <div class="link-item">
               <div class="link-item-top">
@@ -1031,6 +1074,11 @@ async function show(id, kw = null, updateHash = true) {
             </div>
           `).join('')}
         </div>
+        ${hasMany ? `
+          <div class="links-expand-btn" id="linksBottomBtn" onclick="toggleLinksExpand()">
+            展開全部連結（共 ${cur.links.length} 個）▼
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -1206,6 +1254,25 @@ async function jumpToDept(deptName) {
   }
 }
 
+// 切換連結卡片展開/收合
+function toggleLinksExpand() {
+  const grid = $('linksGrid');
+  const bottomBtn = $('linksBottomBtn');
+  const topToggle = $('linksHeaderToggle');
+  if (!grid) return;
+  const isCompact = grid.classList.contains('compact');
+  if (isCompact) {
+    grid.classList.remove('compact');
+    if (bottomBtn) bottomBtn.innerHTML = '▲ 收合為簡潔預覽';
+    if (topToggle) topToggle.textContent = '收合 ▲';
+  } else {
+    grid.classList.add('compact');
+    const count = (cur && cur.links) ? cur.links.length : '';
+    if (bottomBtn) bottomBtn.innerHTML = `展開全部連結（共 ${count} 個）▼`;
+    if (topToggle) topToggle.textContent = '展開全部 ▼';
+  }
+}
+
 // 跳轉至本次會議之各項連結卡片
 function jumpToLinks() {
   const card = $('meetingLinksCard') || document.querySelector('.links-card');
@@ -1213,9 +1280,9 @@ function jumpToLinks() {
     showToast('本次會議無外部連結');
     return;
   }
-  const grid = card.querySelector('.links-grid');
-  if (grid && grid.classList.contains('collapsed')) {
-    grid.classList.remove('collapsed');
+  const grid = $('linksGrid');
+  if (grid && grid.classList.contains('compact')) {
+    toggleLinksExpand();
   }
   isProgrammaticScroll = true;
   const bar = document.querySelector('.dept-jump-bar');
@@ -1224,7 +1291,7 @@ function jumpToLinks() {
   const mainEl = $('main');
   const mainRect = mainEl.getBoundingClientRect();
   const cardRect = card.getBoundingClientRect();
-  const scrollTarget = mainEl.scrollTop + (cardRect.top - mainRect.top) - 68;
+  const scrollTarget = mainEl.scrollTop + (cardRect.top - mainRect.top) - 75;
   mainEl.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
 
   card.style.outline = '3px solid var(--warm)';
