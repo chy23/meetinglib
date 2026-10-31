@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Rounded Background -->
+  <rect width="128" height="128" rx="28" fill="#f5f8fc" stroke="#d3e2f2" stroke-width="2"/>
+  
+  <!-- Bottom Book (Blue) -->
+  <rect x="22" y="84" width="84" height="16" rx="3" fill="#225c94"/>
+  <rect x="26" y="87" width="76" height="10" rx="2" fill="#ffffff"/>
+  <path d="M22 84 h12 v16 h-12 z" fill="#184572"/>
+  
+  <!-- Middle Book (Red) -->
+  <rect x="26" y="62" width="76" height="16" rx="3" fill="#d93829"/>
+  <rect x="30" y="65" width="68" height="10" rx="2" fill="#ffffff"/>
+  <path d="M26 62 h12 v16 h-12 z" fill="#a82417"/>
+  
+  <!-- Top Book (Green) -->
+  <rect x="30" y="40" width="68" height="16" rx="3" fill="#2e8b57"/>
+  <rect x="34" y="43" width="60" height="10" rx="2" fill="#ffffff"/>
+  <path d="M30 40 h12 v16 h-12 z" fill="#1e603b"/>
+  
+  <!-- Bookmark ribbon -->
+  <path d="M68 38 v22 l6 -4 l6 4 v-22 z" fill="#f4b400"/>
+</svg>
