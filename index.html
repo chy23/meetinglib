@@ -3,6 +3,48 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="author" content="新北市林口區麗園國小 楊家驊老師">
+<meta name="creator" content="楊家驊 (Chiahua Yang) - 麗園國小">
+<meta name="description" content="新北市林口區麗園國小校務暨教師會議資料庫系統，提供會議記錄全文檢索、原貌閱讀與各項公文表單連結管理。">
+<!--
+================================================================================
+  🏛️ 校務暨教師午會會議資料庫系統 (MeetingLib)
+  
+  【系統開發與架構設計】
+  建立於：新北市林口區麗園國民小學 楊家驊老師 (Teacher Yang Jiahua)
+  
+  【系統開發歷程與時間表 (Development Milestones & Timeline)】
+  ------------------------------------------------------------------------------
+  📅 2026-10-28 ~ 2026-10-29：系統初創與核心架構建立 (Phase 1)
+     - 確立「零伺服器維護成本」技術架構：整合 Google Drive、Google Apps Script API、
+       GitHub Actions 自動化 CI/CD 工作流與 GitHub Pages 雲端靜態代管。
+     - 導入 PDF.js + 雙層結構 (Canvas 原貌圖層 + 隱形 TextLayer 文字層)，達到公文 100% 原始排版、
+       彩色照片、簽核章戳原貌重現，並支援全文精確選取複製與搜尋定位。
+     - 研發跨會議即時全文搜尋引擎 (BM25/正則即時匹配) 與前後文情境預覽 (Snippets)。
+
+  📅 2026-10-30 ~ 2026-10-31 (上午)：智慧目錄、學期樹與深度語義提煉 (Phase 2)
+     - 重構左側導航為階層樹狀架構：學年度/學期（主項目）➔ 會議類別（子項目）➔ 各次會議列表。
+     - 智慧分類機制（自動辨識校務會議、備課會議、教師午會、行政會議、學年會議、課發會、特推會等），
+       動態過濾僅在該類別具備實際檔案時才生成目錄。
+     - 研發智慧連結萃取器，自動解析公文中各項 Google 表單、雲端影音與研習網站。
+     - 每次開啟網頁智慧定位並載入最新會議記錄。
+
+  📅 2026-10-31 (下午)：資安強化、高辨識度導航與品牌圖示 (Phase 3)
+     - 全面資安強化：杜絕 XSS 跨站腳本攻擊，落實完整 HTML Entity 跳脫防護與安全資料集傳遞。
+     - 導覽列與側邊抽屜易用性重構：設計高對比「☰ 會議目錄」動態膠囊鈕與觸發抽屜。
+     - 打造專屬「📚」圖書館書本 Favicon、標準 Windows 多尺寸 ICO、Apple Touch Icon 與 SVG 向量圖標。
+     - 研發「公文段落出處彈窗」：避免直接跳轉外部網頁，先展示公文上下文，並提供直接跳轉與拷貝網址雙操作。
+
+  📅 2026-10-31 (晚間)：Apple HIG & Apple Design 流暢物理體驗全面升級 (Phase 4)
+     - 依據 Apple Human Interface Guidelines (2026) 與 WWDC 流暢介面原則重構全站：
+     - 支援系統級深色模式 (Dark Mode)，採用 Base (#000000) 與 Elevated (#1c1c1e) 雙層暗色語意色盤。
+     - 全面相容 iPhone 螢幕安全區域 (Safe Area Insets)，完美避開動態島與底部手勢橫條。
+     - 人體工學 44×44 pt 觸控熱區升級，全面消弭誤觸並注入 touch-action 零延遲反饋。
+     - 導入現代 Liquid Glass 透視毛玻璃材質 (backdrop-filter: blur(25px) saturate(180%))。
+     - 行動端重構為 iOS 原生貼底抽屜 (Bottom Sheet)，附帶拖曳把手與下拉滑動關閉物理阻尼手勢。
+     - 完善無障礙偏好相容 (prefers-reduced-motion 與 prefers-reduced-transparency)。
+================================================================================
+-->
 <title>📚 會議資料庫 - 教師午會圖書館</title>
 <link rel="icon" type="image/x-icon" href="./favicon.ico?v=2">
 <link rel="shortcut icon" href="./favicon.ico?v=2">
@@ -1409,6 +1451,14 @@
 <div id="toast"></div>
 
 <script>
+// 彩蛋：系統開發資訊與開發歷程
+console.log(
+  '%c🏛️ 校務會議資料庫系統 %c由 新北市林口區麗園國小 楊家驊老師 規劃開發\n%c📚 開發歷程與系統架構時間表已內嵌於網頁原始碼中 (檢視網頁原始碼查看完整紀要)',
+  'background:#2e5c8a;color:#fff;padding:4px 8px;border-radius:4px 0 0 4px;font-weight:bold;',
+  'background:#e8f0f8;color:#1d3d5e;padding:4px 8px;border-radius:0 4px 4px 0;font-weight:600;',
+  'color:#7b838b;font-size:11px;margin-top:4px;'
+);
+
 // ===== 後端 Apps Script API（備援用）=====
 const API_URL = 'https://script.google.com/macros/s/AKfycbxKcTnI295GXzyUzAkfN0RoWRFot20CI2C70Ok8Vc14AiNsZrkvcEsKnzC4uz1nPXr9/exec';
 // ===========================================

@@ -48,3 +48,10 @@
 - **前端展示**：GitHub Pages 靜態網站（`index.html`，純前端、無伺服器負擔、反應極速）。
 - **後端自動化**：Google Apps Script（OCR 文字擷取與定時觸發）。
 - **同步與摘要處理**：GitHub Actions（`scripts/sync.py` + `.github/workflows/sync.yml` 每小時排程）。
+
+---
+
+## 👨‍💻 開發者與專案授權
+- **建立者**：新北市林口區麗園國民小學 楊家驊老師 (Teacher Yang Jiahua)
+- **建立日期**：2026 年 10 月
+- **核心理念**：結合現代雲端自動化與 Apple 流暢介面標準，提供全體教職員零等待、高品質的會議資訊查閱體驗。
