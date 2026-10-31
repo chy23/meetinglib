@@ -526,22 +526,77 @@
     text-decoration: underline;
   }
 
-  /* 純文字 ASCII 表格與圖片框框 */
+  /* 純文字表格與圖片框框 */
   .ascii-table-wrap {
     margin: 18px 0;
-    background: #fdfbf7;
+    background: #ffffff;
     border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 12px 16px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .ascii-table-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 16px;
+    background: #f7fafc;
+    border-bottom: 1px solid var(--line);
   }
   .ascii-table-title {
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    color: var(--accent);
-    margin-bottom: 8px;
+    color: var(--accent-dark);
+  }
+  .table-actions {
     display: flex;
-    align-items: center;
     gap: 6px;
+  }
+  .tool-btn-sm {
+    padding: 3px 8px;
+    font-size: 11.5px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--ink-light);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .tool-btn-sm:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .table-view-grid {
+    padding: 12px 16px;
+    overflow-x: auto;
+  }
+  .perfect-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", sans-serif;
+    font-size: 14px;
+    border: 1px solid #d0d7de;
+  }
+  .perfect-table th {
+    background: #edf2f7;
+    color: var(--accent-dark);
+    font-weight: 700;
+    padding: 8px 14px;
+    border: 1px solid #d0d7de;
+    text-align: left;
+    white-space: nowrap;
+  }
+  .perfect-table td {
+    padding: 8px 14px;
+    border: 1px solid #d0d7de;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .perfect-table tr:nth-child(even) td {
+    background: #f8fafc;
+  }
+  .perfect-table tr:hover td {
+    background: #f0f7ff;
   }
   .ascii-table {
     margin: 0;
@@ -551,7 +606,8 @@
     color: #1a202c;
     overflow-x: auto;
     white-space: pre;
-    padding: 4px 0;
+    padding: 12px 16px;
+    background: #fdfbf7;
   }
   .ascii-img-box {
     margin: 14px 0;
@@ -965,7 +1021,31 @@ const KNOWN_TABLE_HEADERS = [
   ['日 期', '年 級'],
 ];
 
-// 格式化 OCR 純文字為易讀排版（含 | 與 - 表格重建及圖片框框）
+// 儲存表格純文字以便一鍵複製
+const tableTextStore = {};
+let tableCounter = 0;
+
+function copyTableText(tableId) {
+  const text = tableTextStore[tableId];
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('✅ 已複製純文字表格至剪貼簿！');
+  }).catch(() => {
+    showToast('複製失敗');
+  });
+}
+
+function toggleTableView(tableId) {
+  const grid = $('grid-' + tableId);
+  const ascii = $('ascii-' + tableId);
+  if (!grid || !ascii) return;
+  const isGrid = grid.style.display !== 'none';
+  grid.style.display = isGrid ? 'none' : 'block';
+  ascii.style.display = isGrid ? 'block' : 'none';
+  showToast(isGrid ? '已切換為純 ASCII 等寬視圖' : '已切換為直線精準對齊視圖');
+}
+
+// 格式化 OCR 純文字為易讀排版（含垂直直線絕對對齊之結構化表格與圖片框框）
 function formatTextContent(rawText) {
   if (!rawText) return '<p class="text-line">（尚無文字內容）</p>';
   const rawLines = rawText.split('\n').map(l => l.trim());
@@ -976,7 +1056,7 @@ function formatTextContent(rawText) {
     const line = rawLines[i];
     if (!line) { i++; continue; }
 
-    // 1. 偵測並以 | 與 - 重建表格
+    // 1. 偵測並重建結構化表格
     let matchedHeader = null;
     for (let headers of KNOWN_TABLE_HEADERS) {
       const hLen = headers.length;
@@ -992,7 +1072,7 @@ function formatTextContent(rawText) {
     if (matchedHeader) {
       const hLen = matchedHeader.length;
       i += hLen;
-      const cols = (matchedHeader.length === 6 && matchedHeader[0] === '時間' && matchedHeader[3] === '時間') ? 3 : matchedHeader.length;
+      const cols = (matchedHeader.length === 6 && matchedHeader[0].includes('時間') && matchedHeader[3].includes('時間')) ? 3 : matchedHeader.length;
       const dataCells = [];
 
       while (i < rawLines.length) {
@@ -1006,18 +1086,65 @@ function formatTextContent(rawText) {
         i++;
       }
 
+      // 智能分列（特別處理日期欄位排版，防止 11/10 暫停一次 與 11/12 期中評量 錯位）
       const rows = [];
-      for (let k = 0; k < dataCells.length; k += cols) {
-        const chunk = dataCells.slice(k, k + cols);
-        if (chunk.length > 0) rows.push(chunk);
+      let currRow = [];
+      const hasDateCol = matchedHeader[0].includes('時間') || matchedHeader[0].includes('日期');
+
+      for (let cell of dataCells) {
+        if (hasDateCol && /^\d{1,2}\/\d{1,2}/.test(cell) && currRow.length >= 2) {
+          while (currRow.length < cols) currRow.push('');
+          rows.push(currRow);
+          currRow = [cell];
+        } else {
+          currRow.push(cell);
+          if (currRow.length === cols) {
+            rows.push(currRow);
+            currRow = [];
+          }
+        }
+      }
+      if (currRow.length > 0) {
+        while (currRow.length < cols) currRow.push('');
+        rows.push(currRow);
       }
 
       if (rows.length > 0) {
-        const asciiTable = formatAsciiTable(matchedHeader.slice(0, cols), rows);
+        const tableId = 'tbl_' + (++tableCounter);
+        const asciiHeaders = matchedHeader.slice(0, cols);
+        const asciiTable = formatAsciiTable(asciiHeaders, rows);
+        tableTextStore[tableId] = asciiTable;
+
         html += `
-          <div class="ascii-table-wrap">
-            <div class="ascii-table-title">📊 重建表格（以 | 與 - 繪製）：</div>
-            <pre class="ascii-table">${esc(asciiTable)}</pre>
+          <div class="ascii-table-wrap" id="table-wrap-${tableId}">
+            <div class="ascii-table-top-bar">
+              <span class="ascii-table-title">📊 結構化表格（直線精確對齊）：</span>
+              <div class="table-actions">
+                <button class="tool-btn-sm" onclick="copyTableText('${tableId}')" title="複製純文字表格">📋 複製表格</button>
+                <button class="tool-btn-sm" onclick="toggleTableView('${tableId}')" title="切換精確對齊或純 ASCII 文字">切換視圖</button>
+              </div>
+            </div>
+            
+            <!-- 垂直線絕對 100% 直線對齊視圖 -->
+            <div class="table-view-grid" id="grid-${tableId}">
+              <table class="perfect-table">
+                <thead>
+                  <tr>
+                    ${asciiHeaders.map(h => `<th>${esc(h)}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows.map(r => `
+                    <tr>
+                      ${r.map(c => `<td>${esc(c)}</td>`).join('')}
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+
+            <!-- 純 ASCII 等寬字型視圖（可供自由切換） -->
+            <pre class="ascii-table" id="ascii-${tableId}" style="display:none">${esc(asciiTable)}</pre>
           </div>
         `;
         continue;
