@@ -2,138 +2,1093 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>會議資料庫</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>📚 會議資料庫 - 教師午會圖書館</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-  :root { --bg:#f7f5f0; --panel:#fff; --ink:#2b2b2b; --muted:#777; --accent:#8b5e34; --line:#e4dfd5; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:"PingFang TC","Noto Sans TC",sans-serif; background:var(--bg); color:var(--ink); }
-  header { padding:14px 24px; background:var(--accent); color:#fff; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
-  header h1 { margin:0; font-size:20px; }
-  #q { flex:1; min-width:200px; padding:8px 12px; border:0; border-radius:6px; font-size:15px; }
-  .wrap { display:flex; height:calc(100vh - 60px); }
-  nav { width:280px; overflow:auto; border-right:1px solid var(--line); background:var(--panel); padding:12px; }
-  nav h3 { font-size:13px; color:var(--muted); margin:16px 6px 6px; }
-  nav a { display:block; padding:8px 10px; border-radius:6px; color:var(--ink); text-decoration:none; cursor:pointer; }
-  nav a:hover { background:#f1ece3; }
-  nav a.on { background:var(--accent); color:#fff; }
-  nav small { display:block; opacity:.7; font-size:12px; }
-  main { flex:1; overflow:auto; padding:28px 40px; }
-  .doc { background:var(--panel); padding:32px 40px; border-radius:10px; box-shadow:0 1px 3px #0001; max-width:900px; }
-  .doc h2 { margin-top:0; }
-  .meta { color:var(--muted); margin-bottom:20px; display:flex; gap:16px; }
-  .meta a { color:var(--accent); }
-  .body { white-space:pre-wrap; line-height:1.8; }
-  mark { background:#ffe58a; }
-  #pages { width:100%; }
-  .page { position:relative; margin:0 auto 16px; box-shadow:0 1px 4px #0003; background:#fff; }
-  .page canvas { display:block; }
-  .textLayer .kw { background:rgba(255,200,0,.45); }
-  .loading { color:var(--muted); }
-  .hit { background:var(--panel); padding:14px 18px; border-radius:8px; margin-bottom:10px; cursor:pointer; max-width:900px; }
-  .hit:hover { outline:2px solid var(--accent); }
-  .hit p { margin:6px 0 0; color:#555; font-size:14px; }
-  .tag { font-size:12px; background:#fdf0dc; color:var(--accent); padding:2px 8px; border-radius:10px; margin-left:8px; }
-  @media (max-width:700px){ .wrap{flex-direction:column;height:auto} nav{width:100%;max-height:40vh} main{padding:16px} .doc{padding:20px} }
+  :root {
+    --bg: #f8f6f0;
+    --panel: #ffffff;
+    --panel-sub: #fdfbf7;
+    --ink: #202428;
+    --ink-light: #525960;
+    --muted: #7b838b;
+    --accent: #2e5c8a;
+    --accent-light: #e8f0f8;
+    --accent-dark: #1d3d5e;
+    --warm: #8b5e34;
+    --warm-bg: #fdf5ea;
+    --line: #e6e2d8;
+    --line-light: #f0ece3;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --font-base: 16px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    font-size: var(--font-base);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* 頂部導航列 Header */
+  header {
+    height: 60px;
+    padding: 0 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .brand-icon {
+    font-size: 22px;
+    background: var(--accent-light);
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+  .brand h1 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .brand small {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* 搜尋列 */
+  .search-wrap {
+    flex: 1;
+    max-width: 500px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+  #q {
+    width: 100%;
+    height: 38px;
+    padding: 0 34px 0 34px;
+    border: 1px solid var(--line);
+    background: var(--panel-sub);
+    border-radius: 20px;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+    transition: all 0.2s;
+  }
+  #q:focus {
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(46,92,138,0.15);
+  }
+  .search-clear {
+    position: absolute;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: #ddd;
+    color: #555;
+    border-radius: 50%;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .search-clear.show { display: flex; }
+
+  /* 頂部右側動作 */
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-icon {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .btn-icon:hover {
+    background: var(--panel-sub);
+    border-color: var(--muted);
+  }
+  .menu-toggle {
+    display: none;
+    font-size: 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 6px;
+    color: var(--ink);
+  }
+
+  /* 主版面佈局 */
+  .wrap {
+    display: flex;
+    height: calc(100vh - 60px);
+    position: relative;
+  }
+
+  /* 側邊欄 Sidebar */
+  nav {
+    width: 320px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-right: 1px solid var(--line);
+    background: var(--panel);
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .filter-tags {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+  .filter-pill {
+    padding: 4px 10px;
+    font-size: 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--ink-light);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  .filter-pill.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* 會議目錄分組 */
+  .nav-group {
+    margin-bottom: 8px;
+  }
+  .group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    user-select: none;
+    border-radius: var(--radius-sm);
+  }
+  .group-header:hover { background: var(--bg); }
+  .group-header .chevron { transition: transform 0.2s; font-size: 11px; }
+  .nav-group.collapsed .group-header .chevron { transform: rotate(-90deg); }
+  .nav-group.collapsed .group-list { display: none; }
+  .group-count {
+    font-size: 11px;
+    background: var(--line-light);
+    color: var(--ink-light);
+    padding: 1px 7px;
+    border-radius: 10px;
+  }
+
+  /* 會議清單條目 */
+  .group-list { display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: block;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: var(--panel-sub); }
+  .nav-item.on {
+    background: var(--accent-light);
+    border-left-color: var(--accent);
+    color: var(--accent-dark);
+  }
+  .nav-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 2px;
+  }
+  .nav-item-title {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .nav-item-week {
+    font-size: 11px;
+    background: rgba(0,0,0,0.05);
+    padding: 1px 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+    color: var(--ink-light);
+  }
+  .nav-item-date {
+    font-size: 12px;
+    color: var(--muted);
+    display: block;
+  }
+  .nav-item-badges {
+    display: flex;
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .dept-badge {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #f0ece3;
+    color: #635b4f;
+  }
+  .dept-badge.教 { background: #e3edf7; color: #1e4976; }
+  .dept-badge.學 { background: #e4f4ea; color: #1c6637; }
+  .dept-badge.總 { background: #fbf0dc; color: #855314; }
+  .dept-badge.輔 { background: #f6e8f4; color: #7d2974; }
+
+  /* 主內容區 Main Area */
+  main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 36px 60px;
+    scroll-behavior: smooth;
+  }
+
+  .doc {
+    background: var(--panel);
+    padding: 36px 44px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    max-width: 960px;
+    margin: 0 auto;
+    border: 1px solid var(--line);
+  }
+
+  /* 文章標題與控制工具列 */
+  .doc-header {
+    border-bottom: 1px solid var(--line-light);
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+  }
+  .doc-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .doc h2 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+  .doc-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--muted);
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .meta-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* 模式切換按鈕 (純文字 vs 原版PDF) */
+  .mode-switch-wrap {
+    display: inline-flex;
+    background: var(--bg);
+    padding: 4px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+  }
+  .mode-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+  .mode-btn.active {
+    background: var(--panel);
+    color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* 操作工具列 */
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .tool-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    border: 1px solid var(--line);
+    background: var(--panel-sub);
+    color: var(--ink-light);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tool-btn:hover {
+    background: #fff;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  /* 本次會議 AI 重點摘要卡片 (TL;DR) */
+  .summary-card {
+    background: var(--warm-bg);
+    border: 1px solid #f2dfc5;
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+  }
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+  }
+  .summary-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--warm);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .summary-toggle {
+    font-size: 12px;
+    color: var(--warm);
+    opacity: 0.8;
+  }
+  .summary-list {
+    margin: 12px 0 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .summary-item {
+    font-size: 13.5px;
+    line-height: 1.5;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .summary-cat {
+    font-weight: 700;
+    font-size: 11px;
+    background: #edd8bf;
+    color: var(--warm);
+    padding: 1px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* 處室段落導航條 */
+  .dept-jump-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    padding: 10px 14px;
+    background: var(--panel-sub);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line-light);
+    font-size: 13px;
+  }
+  .dept-jump-bar span { color: var(--muted); font-size: 12px; }
+  .dept-jump-pill {
+    padding: 2px 8px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .dept-jump-pill:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+
+  /* 純文字模式排版 (Text Mode) */
+  .text-content {
+    font-size: var(--doc-font-size, 16px);
+    line-height: 1.85;
+    color: #272d34;
+  }
+  .text-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-dark);
+    margin: 28px 0 12px;
+    padding-left: 10px;
+    border-left: 4px solid var(--accent);
+  }
+  .text-dept-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--warm);
+    background: var(--warm-bg);
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: var(--radius-sm);
+    margin: 22px 0 8px;
+  }
+  .text-subdept-title {
+    font-weight: 700;
+    color: var(--ink);
+    margin: 14px 0 4px;
+  }
+  .text-line {
+    margin-bottom: 8px;
+    word-break: break-word;
+  }
+  .text-line a {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+
+  /* 原始 PDF 模式 (PDF Mode) */
+  #pages { width: 100%; display: none; }
+  .page {
+    position: relative;
+    margin: 0 auto 20px;
+    box-shadow: var(--shadow-md);
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .page canvas { display: block; }
+  .textLayer .kw { background: rgba(255, 213, 0, 0.45); }
+  .loading-msg {
+    padding: 40px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  /* 搜尋結果樣式 */
+  .search-results-header {
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: var(--ink-light);
+  }
+  .hit {
+    background: var(--panel);
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    transition: all 0.15s;
+    max-width: 960px;
+    margin: 0 auto 12px;
+  }
+  .hit:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+  }
+  .hit-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .hit-title { font-weight: 700; color: var(--accent); font-size: 16px; }
+  .hit p {
+    margin: 6px 0 0;
+    color: var(--ink-light);
+    font-size: 14px;
+    line-height: 1.6;
+    background: var(--panel-sub);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+  }
+  mark { background: #ffe685; padding: 0 2px; border-radius: 2px; }
+
+  /* 輕量 Toast 提示 */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(32, 36, 40, 0.9);
+    color: #fff;
+    padding: 10px 18px;
+    border-radius: 20px;
+    font-size: 13.5px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s ease;
+    pointer-events: none;
+  }
+  #toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 列印最佳化 */
+  @media print {
+    header, nav, .toolbar, .mode-switch-wrap, .filter-tags, .dept-jump-bar { display: none !important; }
+    body { background: #fff; color: #000; }
+    .wrap { display: block; height: auto; }
+    main { padding: 0; }
+    .doc { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+  }
+
+  /* 手機與平板響應式設計 */
+  @media (max-width: 820px) {
+    header { padding: 0 14px; gap: 10px; }
+    .menu-toggle { display: block; }
+    .brand small { display: none; }
+    .wrap { position: relative; }
+    nav {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      z-index: 90;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.15);
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+    }
+    nav.open { transform: translateX(0); }
+    .nav-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      z-index: 80;
+      display: none;
+    }
+    .nav-backdrop.open { display: block; }
+    main { padding: 16px 14px; }
+    .doc { padding: 20px 16px; }
+    .doc h2 { font-size: 20px; }
+    .doc-title-row { flex-direction: column; }
+  }
 </style>
 </head>
 <body>
+
 <header>
-  <h1>📚 會議資料庫</h1>
-  <input id="q" placeholder="搜尋所有會議記錄…（本頁內也可用 Ctrl+F）" autocomplete="off">
+  <button class="menu-toggle" id="menuToggle" aria-label="切換選單">☰</button>
+  <a class="brand" href="#">
+    <div class="brand-icon">📚</div>
+    <div>
+      <h1>會議資料庫</h1>
+      <small>教師午會資料圖書館</small>
+    </div>
+  </a>
+
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input id="q" placeholder="全文檢索所有會議紀錄… (Ctrl+F)" autocomplete="off">
+    <button class="search-clear" id="searchClear" aria-label="清除搜尋">✕</button>
+  </div>
+
+  <div class="header-actions">
+    <button class="btn-icon" id="fontDown" title="縮小字體">A-</button>
+    <button class="btn-icon" id="fontUp" title="放大字體">A+</button>
+  </div>
 </header>
+
 <div class="wrap">
-  <nav id="nav">載入中…</nav>
-  <main id="main"></main>
+  <div class="nav-backdrop" id="navBackdrop"></div>
+  <nav id="nav">
+    <div class="filter-tags" id="filterTags">
+      <div class="filter-pill active" data-dept="">全部</div>
+      <div class="filter-pill" data-dept="教務處">教務處</div>
+      <div class="filter-pill" data-dept="學務處">學務處</div>
+      <div class="filter-pill" data-dept="總務處">總務處</div>
+      <div class="filter-pill" data-dept="輔導室">輔導室</div>
+    </div>
+    <div id="navList">載入中…</div>
+  </nav>
+
+  <main id="main">
+    <div class="loading-msg">正在載入圖書館資料…</div>
+  </main>
 </div>
+
+<div id="toast"></div>
+
 <script>
-let data = [], cur = null;
-const $ = id => document.getElementById(id);
-const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-// ===== 設定：貼上 Apps Script 網頁應用程式網址（結尾是 /exec）=====
+// ===== 後端 Apps Script API（備援用）=====
 const API_URL = 'https://script.google.com/macros/s/AKfycbxKcTnI295GXzyUzAkfN0RoWRFot20CI2C70Ok8Vc14AiNsZrkvcEsKnzC4uz1nPXr9/exec';
-// ==================================================================
+// ===========================================
 
+let data = [];
+let cur = null;
+let currentViewMode = localStorage.getItem('viewMode') || 'text'; // 'text' 或 'pdf'
+let currentDeptFilter = '';
+let currentFontSize = parseInt(localStorage.getItem('docFontSize') || '16', 10);
+
+const $ = id => document.getElementById(id);
+const esc = s => (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reEsc = s => (s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Toast 提示訊息
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// 字級調節
+function setFontSize(delta) {
+  currentFontSize = Math.max(14, Math.min(24, currentFontSize + delta));
+  localStorage.setItem('docFontSize', currentFontSize);
+  document.documentElement.style.setProperty('--doc-font-size', currentFontSize + 'px');
+  showToast(`字體大小：${currentFontSize}px`);
+}
+$('fontUp').onclick = () => setFontSize(2);
+$('fontDown').onclick = () => setFontSize(-2);
+document.documentElement.style.setProperty('--doc-font-size', currentFontSize + 'px');
+
+// 手機選單抽屜
+const nav = $('nav');
+const backdrop = $('navBackdrop');
+function toggleMenu(open) {
+  nav.classList.toggle('open', open);
+  backdrop.classList.toggle('open', open);
+}
+$('menuToggle').onclick = () => toggleMenu(!nav.classList.contains('open'));
+backdrop.onclick = () => toggleMenu(false);
+
+// 初始化載入
 load();
 async function load() {
-  $('nav').textContent = '載入中…';
   try {
-    // 優先讀 GitHub Pages 上的靜態副本（快），沒有才問 Apps Script
     let r = await fetch('data/index.json', { cache: 'no-cache' }).catch(() => null);
     if (!r || !r.ok) r = await fetch(API_URL);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     data = await r.json();
-  } catch (e) { $('nav').textContent = '載入失敗：' + e.message; return; }
-  if (!data.length) { $('nav').textContent = '尚無資料'; return; }
-  // 預設開啟離今天最近的一場
-  const now = Date.now();
-  const nearest = data.reduce((a, b) =>
-    Math.abs(new Date(b.date) - now) < Math.abs(new Date(a.date) - now) ? b : a);
-  renderNav(); show(nearest.id);
-  data.slice(0, 2).forEach(m => m.id !== nearest.id && setTimeout(() => getPdf(m.id), 5000)); // 預先載入最近幾份
+  } catch (e) {
+    $('navList').textContent = '載入失敗：' + e.message;
+    return;
+  }
+  if (!data.length) { $('navList').textContent = '尚無會議資料'; return; }
+
+  renderNav();
+
+  // 檢查 URL Hash（專屬分享連結）
+  const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
+  let target = data.find(m => m.date === hash || m.id === hash);
+  if (!target) {
+    // 預設開啟離今天最近的會議
+    const now = Date.now();
+    target = data.reduce((a, b) =>
+      Math.abs(new Date(b.date) - now) < Math.abs(new Date(a.date) - now) ? b : a);
+  }
+  show(target.id);
 }
 
+// 監聽網址 Hash 變動（歷史紀錄上一頁/下一頁）
+window.onhashchange = () => {
+  const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
+  if (hash && cur && cur.date !== hash && cur.id !== hash) {
+    const target = data.find(m => m.date === hash || m.id === hash);
+    if (target) show(target.id, null, false);
+  }
+};
+
+// 處室標籤快篩
+document.querySelectorAll('.filter-pill').forEach(pill => {
+  pill.onclick = () => {
+    document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    currentDeptFilter = pill.dataset.dept || '';
+    renderNav();
+  };
+});
+
+// 渲染左側目錄（依學年度/月份折疊分組）
 function renderNav() {
-  let html = '', group = '';
-  data.forEach(m => {
-    const g = m.date.slice(0, 4) + ' 年 ' + +m.date.slice(5, 7) + ' 月';
-    if (g !== group) { html += `<h3>${g}</h3>`; group = g; }
-    html += `<a data-id="${m.id}" onclick="show('${m.id}')">${esc(m.title)}<small>${m.date}</small></a>`;
+  const listEl = $('navList');
+  let filtered = data;
+  if (currentDeptFilter) {
+    filtered = data.filter(m => (m.tags && m.tags.includes(currentDeptFilter)) || (m.text && m.text.includes(currentDeptFilter)));
+  }
+
+  if (!filtered.length) {
+    listEl.innerHTML = '<div style="color:var(--muted);padding:10px;font-size:13px;">無相符會議</div>';
+    return;
+  }
+
+  // 依照學年度分組，若無則依年月
+  const groups = {};
+  filtered.forEach(m => {
+    const key = m.academic_year || (m.date.slice(0, 4) + ' 年 ' + +m.date.slice(5, 7) + ' 月');
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(m);
   });
-  $('nav').innerHTML = html;
+
+  let html = '';
+  let groupIndex = 0;
+  for (const [groupName, items] of Object.entries(groups)) {
+    const isFirst = groupIndex === 0;
+    html += `
+      <div class="nav-group ${isFirst ? '' : ''}" data-group="${esc(groupName)}">
+        <div class="group-header" onclick="toggleNavGroup(this)">
+          <span>📁 ${esc(groupName)}</span>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="group-count">${items.length} 份</span>
+            <span class="chevron">▼</span>
+          </div>
+        </div>
+        <div class="group-list">
+          ${items.map(m => `
+            <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
+              <div class="nav-item-top">
+                <span class="nav-item-title">${esc(m.title)}</span>
+                ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
+              </div>
+              <span class="nav-item-date">📅 ${m.date}</span>
+              ${m.tags && m.tags.length ? `
+                <div class="nav-item-badges">
+                  ${m.tags.slice(0, 4).map(t => `<span class="dept-badge ${t[0]}">${t.slice(0, 2)}</span>`).join('')}
+                </div>
+              ` : ''}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    groupIndex++;
+  }
+  listEl.innerHTML = html;
 }
 
+function toggleNavGroup(headerEl) {
+  const group = headerEl.closest('.nav-group');
+  group.classList.toggle('collapsed');
+}
+
+// 格式化 OCR 純文字為易讀排版
+function formatTextContent(rawText) {
+  if (!rawText) return '<p class="text-line">（尚無文字內容）</p>';
+  const lines = rawText.split('\n');
+  let html = '';
+
+  for (let line of lines) {
+    line = line.trim();
+    if (!line) continue;
+
+    // 大標題：壹、貳、參...
+    if (/^[壹貳參肆伍陸柒捌玖拾]、/.test(line)) {
+      html += `<div class="text-section-title">${esc(line)}</div>`;
+    }
+    // 處室標題：【教務處】等
+    else if (/^【(教務處|學務處|總務處|輔導處|輔導室|人事室|會計室|校長室|幼兒園)】/.test(line)) {
+      const deptName = line.match(/【([^】]+)】/)[1];
+      html += `<div class="text-dept-title" id="dept-${esc(deptName)}">${esc(line)}</div>`;
+    }
+    // 組別標題：【教學組】等
+    else if (/^【.+】/.test(line)) {
+      html += `<div class="text-subdept-title">${esc(line)}</div>`;
+    }
+    // 一般段落與網址自動超連結
+    else {
+      let linked = esc(line).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+      html += `<div class="text-line">${linked}</div>`;
+    }
+  }
+  return html;
+}
+
+// PDF.js 核心
 const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
 pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
 const pdfCache = {};
 let renderToken = 0;
-
-const PDF_OPTS = { cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true,
-  standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/' };
+const PDF_OPTS = {
+  cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+  cMapPacked: true,
+  standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/'
+};
 
 function getPdf(id) {
-  if (!pdfCache[id]) pdfCache[id] =
-    // 靜態檔支援分段下載：第一頁很快就能顯示
-    pdfjsLib.getDocument({ url: 'data/pdf/' + id + '.pdf', ...PDF_OPTS }).promise
-    .catch(() => fetch(API_URL + '?pdf=' + id)   // 尚未同步的新檔 → 改從 Apps Script 取
-      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
-      .then(b64 => {
-        if (b64.startsWith('ERR')) throw new Error(b64);
-        const bin = atob(b64), bytes = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        return pdfjsLib.getDocument({ data: bytes, ...PDF_OPTS }).promise;
-      }))
-    .catch(e => { delete pdfCache[id]; throw e; });
+  if (!pdfCache[id]) {
+    pdfCache[id] = pdfjsLib.getDocument({ url: 'data/pdf/' + id + '.pdf', ...PDF_OPTS }).promise
+      .catch(() => fetch(API_URL + '?pdf=' + id)
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(b64 => {
+          if (b64.startsWith('ERR')) throw new Error(b64);
+          const bin = atob(b64), bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          return pdfjsLib.getDocument({ data: bytes, ...PDF_OPTS }).promise;
+        }))
+      .catch(e => { delete pdfCache[id]; throw e; });
+  }
   return pdfCache[id];
 }
 
-async function show(id, kw) {
-  const token = ++renderToken;
+// 開啟與呈現會議
+async function show(id, kw = null, updateHash = true) {
   cur = data.find(m => m.id === id);
-  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.id === id));
-  $('main').innerHTML = `<div class="doc"><h2>${esc(cur.title)}</h2>
-    <div class="meta"><span>📅 ${cur.date}</span><a href="${cur.url}" target="_blank">在 Google 雲端開啟 ↗</a></div>
-    <div id="pages"><p class="loading">📄 正在載入原始文件…</p></div></div>`;
+  if (!cur) return;
+
+  if (updateHash) {
+    location.hash = '#' + cur.date;
+  }
+
+  // 關閉手機抽屜
+  toggleMenu(false);
+
+  // 選單標籤高亮
+  document.querySelectorAll('.nav-item').forEach(a => a.classList.toggle('on', a.dataset.id === id));
+
+  // 組合處室跳轉標籤
+  const deptTagsHtml = (cur.tags && cur.tags.length) ? `
+    <div class="dept-jump-bar">
+      <span>📍 處室快速跳轉：</span>
+      ${cur.tags.map(t => `<div class="dept-jump-pill" onclick="jumpToDept('${t}')">${t}</div>`).join('')}
+    </div>
+  ` : '';
+
+  // 組合 AI / 條列重點摘要卡片
+  let summaryHtml = '';
+  if (cur.summary && cur.summary.length) {
+    summaryHtml = `
+      <div class="summary-card">
+        <div class="summary-header" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+          <span class="summary-title">💡 本次會議重點速覽</span>
+          <span class="summary-toggle">收合 / 展開</span>
+        </div>
+        <ul class="summary-list">
+          ${cur.summary.map(s => `
+            <li class="summary-item">
+              <span class="summary-cat">${esc(s.category)}</span>
+              <span>${esc(s.text)}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
+  // 建立主卡片
+  $('main').innerHTML = `
+    <div class="doc">
+      <div class="doc-header">
+        <div class="doc-title-row">
+          <div>
+            <h2>${esc(cur.title)}</h2>
+            <div class="doc-meta" style="margin-top:6px">
+              <span class="meta-tag">📅 ${cur.date}</span>
+              ${cur.academic_year ? `<span class="meta-tag">🎓 ${esc(cur.academic_year)}</span>` : ''}
+              ${cur.week ? `<span class="meta-tag">📌 ${esc(cur.week)}</span>` : ''}
+            </div>
+          </div>
+
+          <!-- 模式切換按鈕 -->
+          <div class="mode-switch-wrap">
+            <button class="mode-btn ${currentViewMode === 'text' ? 'active' : ''}" id="btnModeText" onclick="switchMode('text')">
+              ⚡ 純文字速讀
+            </button>
+            <button class="mode-btn ${currentViewMode === 'pdf' ? 'active' : ''}" id="btnModePdf" onclick="switchMode('pdf')">
+              📑 原始 PDF
+            </button>
+          </div>
+        </div>
+
+        <!-- 動作工具列 -->
+        <div class="toolbar">
+          <button class="tool-btn" onclick="copyShareLink()">🔗 複製分享連結</button>
+          <a class="tool-btn" href="data/pdf/${cur.id}.pdf" download="${cur.date}_${cur.title}.pdf">📥 下載 PDF</a>
+          <button class="tool-btn" onclick="window.print()">🖨️ 列印本篇</button>
+          <a class="tool-btn" href="${cur.url}" target="_blank" rel="noopener">☁️ 在 Google 雲端開啟 ↗</a>
+        </div>
+      </div>
+
+      ${summaryHtml}
+      ${deptTagsHtml}
+
+      <!-- 純文字速讀檢視 -->
+      <div class="text-content" id="textContent" style="${currentViewMode === 'text' ? '' : 'display:none'}">
+        ${formatTextContent(cur.text)}
+      </div>
+
+      <!-- 原始 PDF 檢視 -->
+      <div id="pages" style="${currentViewMode === 'pdf' ? 'display:block' : 'display:none'}">
+        <p class="loading-msg">📄 正在載入原始文件…</p>
+      </div>
+    </div>
+  `;
+
   $('main').scrollTop = 0;
+
+  // 若帶有關鍵字，在純文字模式中高亮
+  if (kw && currentViewMode === 'text') {
+    highlightTextKw(kw);
+  }
+
+  // 若當前是 PDF 模式，載入 PDF.js
+  if (currentViewMode === 'pdf') {
+    renderPdfMode(id, kw);
+  }
+}
+
+// 切換閱讀模式
+function switchMode(mode) {
+  currentViewMode = mode;
+  localStorage.setItem('viewMode', mode);
+  $('btnModeText').classList.toggle('active', mode === 'text');
+  $('btnModePdf').classList.toggle('active', mode === 'pdf');
+  $('textContent').style.display = mode === 'text' ? 'block' : 'none';
+  $('pages').style.display = mode === 'pdf' ? 'block' : 'none';
+
+  if (mode === 'pdf' && !$('pages').querySelector('.page')) {
+    renderPdfMode(cur.id);
+  }
+  showToast(mode === 'text' ? '已切換為純文字速讀模式' : '已切換為原始 PDF 模式');
+}
+
+// 跳轉到特定處室
+function jumpToDept(deptName) {
+  if (currentViewMode !== 'text') {
+    switchMode('text');
+  }
+  setTimeout(() => {
+    const el = document.getElementById('dept-' + deptName);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.outline = '2px solid var(--accent)';
+      setTimeout(() => el.style.outline = '', 1500);
+    } else {
+      showToast('未找到 ' + deptName + ' 專屬段落');
+    }
+  }, 100);
+}
+
+// 複製分享連結
+function copyShareLink() {
+  const url = location.origin + location.pathname + '#' + cur.date;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('✅ 已複製本場會議分享連結！');
+  }).catch(() => {
+    showToast('複製失敗，連結：' + url);
+  });
+}
+
+// 純文字模式關鍵字高亮
+function highlightTextKw(kw) {
+  const box = $('textContent');
+  if (!box || !kw) return;
+  const re = new RegExp(reEsc(kw), 'gi');
+  box.querySelectorAll('.text-line, .text-section-title, .text-subdept-title').forEach(el => {
+    if (el.textContent.match(re)) {
+      el.innerHTML = el.innerHTML.replace(re, '<mark>$&</mark>');
+    }
+  });
+  const first = box.querySelector('mark');
+  if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// 渲染 PDF 模式（Lazy loading）
+async function renderPdfMode(id, kw) {
+  const token = ++renderToken;
   const box = $('pages');
+  box.innerHTML = '<p class="loading-msg">📄 正在載入原始文件…</p>';
+
   try {
     const pdf = await getPdf(id);
     if (token !== renderToken) return;
     box.innerHTML = '';
-    // 先放好每頁的空白框，捲到附近才繪製（頁數多時不會卡住）
+
     const draw = async (n, wrap) => {
-      if (wrap.dataset.done) return; wrap.dataset.done = 1;
+      if (wrap.dataset.done) return;
+      wrap.dataset.done = '1';
       const page = await pdf.getPage(n);
       const vp = page.getViewport({ scale: box.clientWidth / page.getViewport({ scale: 1 }).width });
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       wrap.style.setProperty('--scale-factor', vp.scale);
       const canvas = document.createElement('canvas');
-      canvas.width = vp.width * dpr; canvas.height = vp.height * dpr;
-      canvas.style.width = vp.width + 'px'; canvas.style.height = vp.height + 'px';
+      canvas.width = vp.width * dpr;
+      canvas.height = vp.height * dpr;
+      canvas.style.width = vp.width + 'px';
+      canvas.style.height = vp.height + 'px';
       const tl = document.createElement('div');
       tl.className = 'textLayer';
       wrap.append(canvas, tl);
@@ -141,50 +1096,115 @@ async function show(id, kw) {
       await pdfjsLib.renderTextLayer({ textContentSource: await page.getTextContent(), container: tl, viewport: vp }).promise;
       return tl;
     };
+
     const first = await pdf.getPage(1);
     if (token !== renderToken) return;
     const v1 = first.getViewport({ scale: 1 });
     const h = box.clientWidth / v1.width * v1.height;
-    box.innerHTML = '';
     const wraps = [];
     for (let n = 1; n <= pdf.numPages; n++) {
       const w = document.createElement('div');
-      w.className = 'page'; w.style.width = box.clientWidth + 'px'; w.style.minHeight = h + 'px';
-      box.append(w); wraps.push(w);
+      w.className = 'page';
+      w.style.width = box.clientWidth + 'px';
+      w.style.minHeight = h + 'px';
+      box.append(w);
+      wraps.push(w);
     }
+
     const io = new IntersectionObserver(es => es.forEach(e => {
-      if (e.isIntersecting) { io.unobserve(e.target); draw(wraps.indexOf(e.target) + 1, e.target); }
-    }), { root: $('main'), rootMargin: '1500px 0px' });
-    if (kw) {  // 搜尋跳轉：依序繪製直到找到關鍵字
+      if (e.isIntersecting) {
+        io.unobserve(e.target);
+        draw(wraps.indexOf(e.target) + 1, e.target);
+      }
+    }), { root: $('main'), rootMargin: '1200px 0px' });
+
+    if (kw) {
       for (let n = 1; n <= pdf.numPages && token === renderToken; n++) {
         const tl = await draw(n, wraps[n - 1]);
         const sp = tl && [...tl.querySelectorAll('span')].find(x => x.textContent.toLowerCase().includes(kw.toLowerCase()));
-        if (sp) { tl.querySelectorAll('span').forEach(x => x.textContent.toLowerCase().includes(kw.toLowerCase()) && x.classList.add('kw')); sp.scrollIntoView({ block: 'center' }); break; }
+        if (sp) {
+          tl.querySelectorAll('span').forEach(x => x.textContent.toLowerCase().includes(kw.toLowerCase()) && x.classList.add('kw'));
+          sp.scrollIntoView({ block: 'center' });
+          break;
+        }
       }
     }
     wraps.forEach(w => io.observe(w));
   } catch (e) {
     if (token !== renderToken) return;
-    box.innerHTML = `<p class="loading">⚠️ 原始文件載入失敗（${esc(e.message)}），以下為擷取文字：</p><div class="body">${esc(cur.text || '')}</div>`;
+    box.innerHTML = `<p class="loading-msg">⚠️ 原始文件載入失敗（${esc(e.message)}），已自動切換為純文字模式。</p>`;
+    switchMode('text');
   }
 }
 
-$('q').addEventListener('input', e => {
+// 搜尋功能
+const searchInput = $('q');
+const searchClear = $('searchClear');
+
+searchClear.onclick = () => {
+  searchInput.value = '';
+  searchClear.classList.remove('show');
+  if (cur) show(cur.id);
+};
+
+searchInput.addEventListener('input', e => {
   const kw = e.target.value.trim();
-  if (!kw) return show(cur.id);
+  searchClear.classList.toggle('show', !!kw);
+
+  if (!kw) {
+    if (cur) show(cur.id);
+    return;
+  }
+
   const re = new RegExp(reEsc(kw), 'gi');
   const hits = data.map(m => {
-    const all = (m.title + '\n' + m.text).match(re);
-    if (!all) return null;
-    const i = m.text.search(re);
-    const snip = i < 0 ? '' : m.text.slice(Math.max(0, i - 40), i + 60).replace(/\s+/g, ' ');
-    return { m, n: all.length, snip };
+    const full = (m.title + '\n' + (m.academic_year || '') + '\n' + (m.text || ''));
+    const matches = full.match(re);
+    if (!matches) return null;
+
+    // 找出多個上下文片段
+    const snippets = [];
+    let pos = 0;
+    while (snippets.length < 2 && pos < m.text.length) {
+      const idx = m.text.slice(pos).search(re);
+      if (idx === -1) break;
+      const actualIdx = pos + idx;
+      const start = Math.max(0, actualIdx - 35);
+      const end = Math.min(m.text.length, actualIdx + 55);
+      snippets.push(m.text.slice(start, end).replace(/\s+/g, ' '));
+      pos = actualIdx + kw.length + 30;
+    }
+    return { m, count: matches.length, snippets };
   }).filter(Boolean);
+
   const hl = s => esc(s).replace(new RegExp(reEsc(esc(kw)), 'gi'), '<mark>$&</mark>');
-  $('main').innerHTML = `<p>找到 ${hits.length} 份會議包含「${esc(kw)}」</p>` + hits.map(h =>
-    `<div class="hit" onclick="show('${h.m.id}', ${esc(JSON.stringify(kw))})">
-      <b>${hl(h.m.title)}</b><span class="tag">${h.m.date}</span><span class="tag">${h.n} 處</span>
-      <p>…${hl(h.snip)}…</p></div>`).join('');
+
+  $('main').innerHTML = `
+    <div style="max-width:960px;margin:0 auto">
+      <div class="search-results-header">
+        🔍 搜尋「<strong>${esc(kw)}</strong>」共找到 <strong>${hits.length}</strong> 份會議紀錄
+      </div>
+      ${hits.length ? hits.map(h => `
+        <div class="hit" onclick="show('${h.m.id}', ${esc(JSON.stringify(kw))})">
+          <div class="hit-title-row">
+            <span class="hit-title">${hl(h.m.title)}</span>
+            <span class="tag">📅 ${h.m.date} · ${h.count} 處符合</span>
+          </div>
+          ${h.snippets.map(snip => `<p>…${hl(snip)}…</p>`).join('')}
+        </div>
+      `).join('') : '<div class="hit"><p>沒有找到符合的會議內容，請嘗試其他關鍵字。</p></div>'}
+    </div>
+  `;
+  $('main').scrollTop = 0;
+});
+
+// 快捷鍵支援：⌘+K / Ctrl+K 聚焦搜尋
+window.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    searchInput.focus();
+    searchInput.select();
+  }
 });
 </script>
 </body>
