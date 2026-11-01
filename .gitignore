@@ -1,0 +1,12 @@
+# macOS
+.DS_Store
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+
+# Desktop App Build Artifacts
+desktop-app/MeetingPublisher.app
+/tmp/MeetingPublisher*
