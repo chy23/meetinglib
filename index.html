@@ -481,9 +481,43 @@
   }
   .nav-item:hover { background: var(--panel-sub); }
   .nav-item.on {
-    background: var(--accent-light);
-    border-left-color: var(--accent);
-    color: var(--accent-dark);
+    background: #eaf2fb !important;
+    border: 1.5px solid #2e5c8a !important;
+    border-left: 4.5px solid #1f476d !important;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(46, 92, 138, 0.16);
+    color: #1a3c61 !important;
+    position: relative;
+  }
+  .nav-item.on .nav-item-title {
+    color: #1a3c61 !important;
+    font-weight: 700;
+  }
+  .nav-item.on .nav-item-date {
+    color: #3b6690 !important;
+    font-weight: 600;
+  }
+  .nav-item.on .nav-item-week {
+    background: #2e5c8a !important;
+    color: #ffffff !important;
+    font-weight: 700;
+  }
+  .nav-item-reading-badge {
+    display: none;
+  }
+  .nav-item.on .nav-item-reading-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #1a3c61;
+    background: rgba(46, 92, 138, 0.14);
+    border: 1px solid rgba(46, 92, 138, 0.25);
+    padding: 1px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    white-space: nowrap;
   }
   .nav-item-top {
     display: flex;
@@ -1599,8 +1633,6 @@ async function load() {
   }
   if (!data.length) { $('navList').textContent = '尚無會議資料'; return; }
 
-  renderNav();
-
   // 檢查 URL Hash（專屬分享連結）
   const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
   let target = data.find(m => m.date === hash || m.id === hash);
@@ -1608,7 +1640,11 @@ async function load() {
     // 每次開啟網頁預設開啟最新日期的會議
     target = data.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
   }
-  show(target.id);
+  cur = target;
+
+  // 先設定當前會議再渲染目錄：確保「正在閱覽項目」自帶底色與外框，其他分類預設折疊收合！
+  renderNav();
+  show(target.id, null, false);
 }
 
 // 監聽網址 Hash 變動（歷史紀錄上一頁/下一頁）
@@ -1685,12 +1721,15 @@ function renderNav() {
     });
 
     const hasCur = cur && items.some(m => m.id === cur.id);
-    const isGroupOpen = groupIndex === 0 || hasCur;
+    const isGroupOpen = hasCur || (!cur && groupIndex === 0);
 
     let subHtml = '';
+    let subIndex = 0;
     for (const [catName, catData] of Object.entries(subCategories)) {
+      // 預設收合！只有包含目前正在閱覽會議 (cur) 的子項目才展開；其餘子項目預設折疊收合！
       const hasCurSub = cur && catData.items.some(m => m.id === cur.id);
-      const isSubOpen = groupIndex === 0 || hasCurSub;
+      const isSubOpen = hasCurSub || (!cur && groupIndex === 0 && subIndex === 0);
+      subIndex++;
 
       subHtml += `
         <div class="sub-group ${isSubOpen ? '' : 'collapsed'}" data-category="${esc(catName)}">
@@ -1705,7 +1744,7 @@ function renderNav() {
             ${catData.items.map(m => `
               <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
                 <div class="nav-item-top">
-                  <span class="nav-item-title">${esc(m.title)}${m.version ? `<span class="version-badge">${esc(m.version)}</span>` : ''}</span>
+                  <span class="nav-item-title">${esc(m.title)}${m.version ? `<span class="version-badge">${esc(m.version)}</span>` : ''}<span class="nav-item-reading-badge">📍 閱覽中</span></span>
                   ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
                 </div>
                 <span class="nav-item-date">📅 ${m.date}</span>
