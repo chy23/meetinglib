@@ -1,7 +1,8 @@
 """從 Apps Script 同步會議索引、PDF 與抽取實體圖檔（含表格截圖、照片）到 data/，並提煉重點摘要。"""
 import base64, json, os, re, shutil, urllib.request
 
-API = os.environ.get("API_URL") or open("index.html", encoding="utf-8").read().split("const API_URL = '")[1].split("'")[0]
+INDEX_HTML_PATH = os.path.join(os.path.dirname(__file__), "..", "index.html")
+API = os.environ.get("API_URL") or (open(INDEX_HTML_PATH, encoding="utf-8").read().split("const API_URL = '")[1].split("'")[0] if os.path.exists(INDEX_HTML_PATH) else "")
 ROOT = os.path.join(os.path.dirname(__file__), "..", "data")
 PDF_DIR = os.path.join(ROOT, "pdf")
 IMG_BASE_DIR = os.path.join(ROOT, "images")
@@ -56,6 +57,101 @@ def get_icon(u, title):
         return '🎓', '研習學習網'
     return '🔗', '外部連結'
 
+def extract_internal_forms(text):
+    """
+    智慧辨識無外網 URL、但需要在「校務行政系統 / 校內填報」完成的事項
+    自動賦予新北市校務行政系統網址（https://esa.ntpc.edu.tw/），並歸類於「校內填報」
+    """
+    lines = [l.strip() for l in text.split('\n') if l.strip()]
+    forms = []
+    seen = set()
+
+    for idx, l in enumerate(lines):
+        # 排除包含外網 URL 的行（外網連結由 extract_clean_links 處理）
+        if 'http://' in l or 'https://' in l:
+            continue
+
+        # 1. 題庫管理
+        if '題庫管理' in l:
+            title = '試卷上傳校務行政系統【題庫管理】模組'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 2. 設備維修
+        if '設備維修' in l and '校務' in l:
+            title = '校務行政系統—設備維修報修'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 3. 語文競賽
+        if '語文競賽' in l and ('填報' in l or '報名' in l or '校務' in l):
+            title = '校內語文競賽報名（校內填報）'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 4. 公開授課
+        if '公開授課' in l and '填報' in l and not any(k in l for k in ['已結束', '辦理流程']):
+            title = '校內公開授課（校內填報）'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 5. 超鐘點設定
+        if '超鐘點' in l and ('填報' in l or '設定' in l or '校務' in l):
+            title = '教師超鐘點節數設定（校內填報）'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 6. 優良暑假作業
+        if '優良暑假作業' in l and '填報' in l and not any(k in l for k in ['已私訊', '無須安排', '歉意']):
+            title = '優良暑假作業填報（校內填報）'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 7. 期中評量各班前三名填報
+        if '前三名填報' in l or ('評量' in l and '填報' in l):
+            title = '期中評量各班前三名填報（校內填報）'
+            if title not in seen:
+                seen.add(title)
+                forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': title, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            continue
+
+        # 8. 通用校內填報 / 校務行政填報模組
+        if re.search(r'校務(行政)?系統.*?(校內填報|填報模組)|校內填報', l):
+            if any(k in l for k in ['密碼', '帳號', '點名', '請假', '代收代辦', '已完成', '已結束']):
+                continue
+            # 若此行只有「校務行政系統-校內填報」六七個字且已有具體項目，跳過
+            if re.sub(r'[\s\-_—]+', '', l) in ['校務行政系統校內填報', '校內填報']:
+                continue
+            m_title = re.search(r'[「『"“]([^」』"”]+)[」』"”]', l)
+            if m_title:
+                t = f"{m_title.group(1).strip()}（校內填報）"
+                if t not in seen:
+                    seen.add(t)
+                    forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': t, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+            else:
+                clean_l = re.sub(r'^[一二三四五六七八九十\d\.\(（\)]+、?\s*', '', l)
+                parts = re.split(r'[，,；;。]', clean_l)
+                cand = parts[0].strip()
+                if 2 <= len(cand) <= 30 and cand not in seen:
+                    if not any(k in cand for k in ['填報', '報名', '校務', '模組', '報修', '設定']):
+                        cand = f"{cand}（校內填報）"
+                    seen.add(cand)
+                    forms.append({'url': 'https://esa.ntpc.edu.tw/', 'title': cand, 'category': '校內填報', 'icon': '🏫', 'domain': 'esa.ntpc.edu.tw'})
+
+    return forms
+
 def extract_clean_links(text):
     lines = [l.strip() for l in text.split('\n') if l.strip()]
     links = []
@@ -107,7 +203,7 @@ def extract_clean_links(text):
                 'icon': icon,
                 'domain': domain
             })
-    return links
+    return links + extract_internal_forms(text)
 
 COMMON_SURNAMES = '陳林黃張李王吳劉蔡楊許鄭謝郭洪曾邱廖賴周徐蘇葉莊呂江何蕭羅高簡朱鍾施游彭詹胡顏柯翁魏孫樊范方鄧石戴宋薛'
 SURNAME_GROUP = '[' + COMMON_SURNAMES + ']'

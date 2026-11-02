@@ -78,6 +78,27 @@
         "category": "線上表單",
         "icon": "📝",
         "domain": "forms.gle"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "試卷上傳校務行政系統【題庫管理】模組",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校內語文競賽報名（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -111,6 +132,13 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "anthroposophyyilan.org.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "期中評量各班前三名填報（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": []
@@ -179,6 +207,27 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "reurl.cc"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "試卷上傳校務行政系統【題庫管理】模組",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校內語文競賽報名（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -272,6 +321,27 @@
         "category": "線上表單",
         "icon": "📝",
         "domain": "forms.gle"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "試卷上傳校務行政系統【題庫管理】模組",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校內語文競賽報名（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -353,6 +423,27 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "atozwyc.pixnet.net"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校內語文競賽報名（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "試卷上傳校務行政系統【題庫管理】模組",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -377,7 +468,15 @@
       "學務處",
       "輔導處"
     ],
-    "links": [],
+    "links": [
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校內語文競賽報名（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      }
+    ],
     "images": []
   },
   {
@@ -395,7 +494,22 @@
       "學務處",
       "輔導處"
     ],
-    "links": [],
+    "links": [
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "試卷上傳校務行政系統【題庫管理】模組",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      }
+    ],
     "images": [
       "data/images/1oHotDBP-SNSZut5gN-VIMe_dM6BYwHCH/img_1.jpg",
       "data/images/1oHotDBP-SNSZut5gN-VIMe_dM6BYwHCH/img_2.jpg",
@@ -434,6 +548,13 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "gifted.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -477,6 +598,27 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "gifted.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "115 學年度公開授課（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "優良暑假作業填報（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -530,6 +672,34 @@
         "category": "雲端資源",
         "icon": "📁",
         "domain": "drive.google.com"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "教師超鐘點節數設定（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "115 學年度公開授課（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "優良暑假作業填報（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -582,6 +752,13 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "gifted.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "優良暑假作業填報（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": []
@@ -657,6 +834,27 @@
         "category": "外部連結",
         "icon": "🔗",
         "domain": "gifted.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "115 學年度公開授課（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "優良暑假作業填報（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [
@@ -731,6 +929,34 @@
         "category": "影音說明",
         "icon": "🎬",
         "domain": "youtube.com"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "教師超鐘點節數設定（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校內公開授課（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "優良暑假作業填報（校內填報）",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
+      },
+      {
+        "url": "https://esa.ntpc.edu.tw/",
+        "title": "校務行政系統—設備維修報修",
+        "category": "校內填報",
+        "icon": "🏫",
+        "domain": "esa.ntpc.edu.tw"
       }
     ],
     "images": [

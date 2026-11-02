@@ -802,6 +802,11 @@
     white-space: nowrap;
     font-weight: 600;
   }
+  .link-cat-tag.tag-internal {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #c4b5fd;
+  }
   .link-domain {
     font-size: 11px;
     color: var(--muted);
@@ -1865,13 +1870,13 @@ async function show(id, kw = null, updateHash = true) {
               </div>
               <div class="link-item-bottom">
                 <div class="link-item-meta">
-                  <span class="link-cat-tag">${esc(l.category || '外部連結')}</span>
+                  <span class="link-cat-tag ${l.category === '校內填報' ? 'tag-internal' : ''}">${esc(l.category || '外部連結')}</span>
                   <span class="link-domain">${esc(l.domain)}</span>
                 </div>
                 <div class="link-actions">
                   <button class="btn-link-action" data-url="${esc(l.url)}" onclick="event.stopPropagation(); copyUrl(this.dataset.url)" title="複製連結網址">📋 複製</button>
                   <button class="btn-link-action btn-link-action-primary" onclick="event.stopPropagation(); openLinkModal(${idx})" title="查看原始資料及出處">📄 原始資料</button>
-                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" title="直接前往開啟連結">開啟 ↗</a>
+                  <a class="btn-link-action" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" title="直接前往開啟連結">${l.category === '校內填報' ? '前往 ↗' : '開啟 ↗'}</a>
                 </div>
               </div>
             </div>
@@ -2237,7 +2242,7 @@ function openLinkModal(idx) {
           </h3>
         </a>
         <div class="modal-link-tags">
-          <span class="link-cat-tag">${esc(link.category || '外部連結')}</span>
+          <span class="link-cat-tag ${link.category === '校內填報' ? 'tag-internal' : ''}">${esc(link.category || '外部連結')}</span>
           <span class="link-domain">${esc(link.domain)}</span>
         </div>
       </div>
@@ -2249,11 +2254,11 @@ function openLinkModal(idx) {
     </div>
 
     <div class="modal-section">
-      <div class="modal-section-label">🔗 原始連結網址（點擊直接跳轉）：</div>
+      <div class="modal-section-label">${link.category === '校內填報' ? '🏫 填報系統入口（新北市校務行政系統）：' : '🔗 原始連結網址（點擊直接跳轉）：'}</div>
       <div class="modal-url-box">
         <a class="modal-url-link" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer" title="直接點擊前往開啟連結">
           <span class="modal-url-text">${esc(link.url)}</span>
-          <span class="modal-url-jump">開啟 ↗</span>
+          <span class="modal-url-jump">${link.category === '校內填報' ? '前往 ↗' : '開啟 ↗'}</span>
         </a>
         <button class="btn-copy-url" data-url="${esc(link.url)}" onclick="copyUrl(this.dataset.url)" title="複製此連結網址">📋 複製</button>
       </div>
@@ -2262,7 +2267,7 @@ function openLinkModal(idx) {
     <div class="modal-footer">
       <button class="btn-modal-secondary" onclick="closeLinkModal()">✕ 關閉視窗</button>
       <a class="btn-modal-primary" href="${esc(link.url)}" target="_blank" rel="noopener noreferrer">
-        🌐 前往開啟連結 ↗
+        ${link.category === '校內填報' ? '🏫 前往校務行政系統 ↗' : '🌐 前往開啟連結 ↗'}
       </a>
     </div>
   `;
