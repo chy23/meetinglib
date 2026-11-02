@@ -11,7 +11,7 @@
    - 支援將會議 PDF 直接拖曳進懸浮面板。
    - 智慧檔名辨識：自動從 `YYYY-MM-DD_會議名稱.pdf` 解析出日期與名稱。
 4. **雙平台推播發布**：
-   - **第一平台：Google 雲端硬碟**：自動同步存檔至本機 Google 雲端硬碟 (`/Users/chiahua/Google 雲端硬碟/會議資料庫`)，Google Drive 自動背景上傳。
+   - **第一平台：Google 雲端硬碟**：自動同步存檔至本機 Google 雲端硬碟 (`/Users/chiahua/Google 雲端硬碟/會議資料`)，Google Drive 自動背景上傳。
    - **第二平台：GitHub Pages 網站**：以 Apple PDFKit 原生抽取全文與圖片，自動執行學生個資脫敏（PII Sanitization），更新 `index.json` 並推送到 GitHub，30 秒內網站即時上線。
 5. **macOS 原生系統推播通知**：發布或同步完成時，macOS 右上角即時跳出橫幅提醒。
 

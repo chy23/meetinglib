@@ -496,6 +496,29 @@
     font-size: 14px;
     font-weight: 600;
   }
+  .version-badge {
+    font-size: 10.5px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #fff2e8;
+    color: #d4380d;
+    border: 1px solid #ffbb96;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+  .doc-version-badge {
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: #fff2e8;
+    color: #d4380d;
+    border: 1px solid #ffbb96;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
   .nav-item-week {
     font-size: 11px;
     background: rgba(0,0,0,0.05);
@@ -1682,7 +1705,7 @@ function renderNav() {
             ${catData.items.map(m => `
               <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
                 <div class="nav-item-top">
-                  <span class="nav-item-title">${esc(m.title)}</span>
+                  <span class="nav-item-title">${esc(m.title)}${m.version ? `<span class="version-badge">${esc(m.version)}</span>` : ''}</span>
                   ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
                 </div>
                 <span class="nav-item-date">📅 ${m.date}</span>
@@ -1850,7 +1873,7 @@ async function show(id, kw = null, updateHash = true) {
       <div class="doc-header">
         <div class="doc-title-row">
           <div>
-            <h2>${esc(cur.title)}</h2>
+            <h2>${esc(cur.title)}${cur.version ? `<span class="doc-version-badge">${esc(cur.version)}</span>` : ''}</h2>
             <div class="doc-meta">
               <span class="meta-tag">📅 ${cur.date}</span>
               ${cur.academic_year ? `<span class="meta-tag">🎓 ${esc(cur.academic_year)}</span>` : ''}

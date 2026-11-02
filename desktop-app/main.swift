@@ -6,11 +6,18 @@ import UserNotifications
 // MARK: - 常數與設定管理
 struct AppConfig {
     static let defaults = UserDefaults.standard
-    static let defaultGdrivePath = "/Users/chiahua/Google 雲端硬碟/會議資料庫"
+    static let defaultGdrivePath = "/Users/chiahua/Google 雲端硬碟/會議資料"
     static let websiteUrl = "https://chy23.github.io/meetinglib/"
     
     static var gdrivePath: String {
-        get { defaults.string(forKey: "gdrivePath") ?? defaultGdrivePath }
+        get {
+            let val = defaults.string(forKey: "gdrivePath") ?? defaultGdrivePath
+            if val.contains("會議資料庫") {
+                defaults.set(defaultGdrivePath, forKey: "gdrivePath")
+                return defaultGdrivePath
+            }
+            return val
+        }
         set { defaults.set(newValue, forKey: "gdrivePath") }
     }
     
@@ -168,7 +175,7 @@ class PublishWindowController: NSWindowController {
         contentView.addSubview(titleField)
         
         // 4. 同步選項
-        gdriveCheckbox = NSButton(checkboxWithTitle: "同步存檔至 Google 雲端硬碟 (會議資料庫)", target: nil, action: nil)
+        gdriveCheckbox = NSButton(checkboxWithTitle: "同步存檔至 Google 雲端硬碟 (會議資料)", target: nil, action: nil)
         gdriveCheckbox.state = .on
         gdriveCheckbox.frame = NSRect(x: 22, y: 135, width: 350, height: 20)
         contentView.addSubview(gdriveCheckbox)
@@ -218,15 +225,35 @@ class PublishWindowController: NSWindowController {
         publishButton.isEnabled = true
         statusLabel.stringValue = "準備就緒，請核對上方日期與名稱後點擊發布"
         
-        // 智慧解析檔名：例如 2026-11-04_教師午會記錄.pdf
-        let filename = (url.deletingPathExtension().lastPathComponent)
+        // 智慧解析檔名：例如 2026-09-02_擴大行政會議 (4 版).pdf 或 2026-09-30_擴大行政會議 (2 版)-.pdf
+        var rawName = url.deletingPathExtension().lastPathComponent
+        // 去除尾隨的橫槓、破折號與空格
+        rawName = rawName.replacingOccurrences(of: #"[ \t\-_–~]+$"#, with: "", options: .regularExpression)
+        
         let regex = try? NSRegularExpression(pattern: #"^(\d{4}-\d{2}-\d{2})_(.+)$"#)
-        if let match = regex?.firstMatch(in: filename, range: NSRange(location: 0, length: filename.utf16.count)) {
-            if let dateRange = Range(match.range(at: 1), in: filename) {
-                dateField.stringValue = String(filename[dateRange])
+        if let match = regex?.firstMatch(in: rawName, range: NSRange(location: 0, length: rawName.utf16.count)) {
+            if let dateRange = Range(match.range(at: 1), in: rawName) {
+                dateField.stringValue = String(rawName[dateRange])
             }
-            if let titleRange = Range(match.range(at: 2), in: filename) {
-                titleField.stringValue = String(filename[titleRange])
+            if let titleRange = Range(match.range(at: 2), in: rawName) {
+                var extractedTitle = String(rawName[titleRange])
+                // 智慧識別版本號：如 (4 版)、(2版)、[3版]、(1版)
+                let verRegex = try? NSRegularExpression(pattern: #"[\(（\[\s_]+(?:第\s*)?(\d+|[vV]\d+)\s*版?[\)）\]\s_\-]*$"#)
+                var detectedVersion = ""
+                if let verMatch = verRegex?.firstMatch(in: extractedTitle, range: NSRange(location: 0, length: extractedTitle.utf16.count)) {
+                    if let vRange = Range(verMatch.range, in: extractedTitle) {
+                        let verText = String(extractedTitle[vRange])
+                        if let numMatch = try? NSRegularExpression(pattern: #"\d+"#).firstMatch(in: verText, range: NSRange(location: 0, length: verText.utf16.count)),
+                           let numRange = Range(numMatch.range, in: verText) {
+                            detectedVersion = "\(verText[numRange])版"
+                        }
+                        extractedTitle = String(extractedTitle[..<vRange.lowerBound]).trimmingCharacters(in: .whitespacesAndNewlines)
+                    }
+                }
+                titleField.stringValue = extractedTitle
+                if !detectedVersion.isEmpty {
+                    statusLabel.stringValue = "✨ 偵測到版本更新：\(detectedVersion)（將自動以最新修訂版覆蓋更新）"
+                }
             }
         }
     }

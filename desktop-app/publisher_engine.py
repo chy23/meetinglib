@@ -29,20 +29,24 @@ from sync import (
     sanitize_pii,
     enrich_meeting,
     clean_url,
-    get_domain
+    get_domain,
+    parse_meeting_filename
 )
 
 def generate_file_id(date_str, title_str):
-    """根據日期與標題生成穩定的 ID"""
-    h = hashlib.sha1(f"{date_str}_{title_str}".encode('utf-8')).hexdigest()
+    """根據日期與乾淨標題生成穩定的 ID"""
+    clean_title, _ = parse_meeting_filename(title_str)
+    h = hashlib.sha1(f"{date_str}_{clean_title}".encode('utf-8')).hexdigest()
     # 仿照 Google Drive ID 格式（28~33 碼英數字）
     return f"1pub_{date_str.replace('-', '')}_{h[:16]}"
 
 def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
     """
-    執行單份會議的發布流程
+    執行單份會議的發布流程（支援 1版、2版、3版 智慧版本辨識與自動覆蓋舊版）
     """
-    print(f"[1/5] 驗證檔案與準備發布: {date_str} {title_str}")
+    clean_title, version = parse_meeting_filename(title_str)
+    ver_tag = f" [{version}]" if version else ""
+    print(f"[1/5] 驗證檔案與準備發布: {date_str} {clean_title}{ver_tag}")
     if not os.path.exists(pdf_path):
         raise FileNotFoundError(f"找不到指定的 PDF 檔案: {pdf_path}")
 
@@ -51,7 +55,10 @@ def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
 
     # 1. 如果有指定 Google Drive 資料夾，複製一份過去完成第一網站(雲端硬碟)發布
     if gdrive_dir and os.path.exists(gdrive_dir):
-        dest_filename = f"{date_str}_{title_str}.pdf"
+        # 雲端硬碟保留使用者原始版本標籤，例如 2026-09-02_擴大行政會議 (4版).pdf
+        dest_filename = os.path.basename(pdf_path)
+        if not dest_filename.startswith(date_str):
+            dest_filename = f"{date_str}_{title_str}.pdf"
         gdrive_dest = os.path.join(gdrive_dir, dest_filename)
         shutil.copy2(pdf_path, gdrive_dest)
         print(f"[2/5] ✅ 已同步至 Google 雲端硬碟: {gdrive_dest}")
@@ -59,7 +66,7 @@ def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
         print("[2/5] ℹ️ 未指定 Google 雲端硬碟或路徑未啟用，略過本機 Google Drive 複製")
 
     # 2. 複製 PDF 到專案 data/pdf/
-    file_id = generate_file_id(date_str, title_str)
+    file_id = generate_file_id(date_str, clean_title)
     local_pdf_dest = os.path.join(PDF_DIR, f"{file_id}.pdf")
     shutil.copy2(pdf_path, local_pdf_dest)
 
@@ -74,15 +81,18 @@ def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
     meeting_obj = {
         "id": file_id,
         "date": date_str,
-        "title": title_str,
+        "title": clean_title,
         "url": f"data/pdf/{file_id}.pdf",
         "updated": subprocess.check_output(["date", "-u", "+%Y-%m-%dT%H:%M:%S.000Z"]).decode().strip(),
         "text": sanitized_text,
         "images": image_paths
     }
+    if version:
+        meeting_obj["version"] = version
+
     meeting_obj = enrich_meeting(meeting_obj)
 
-    # 5. 更新 data/index.json
+    # 5. 更新 data/index.json（若同日已有同名會議，自動以新版本覆蓋）
     all_meetings = []
     if os.path.exists(INDEX_PATH):
         try:
@@ -91,12 +101,13 @@ def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
         except Exception:
             all_meetings = []
 
-    # 檢查是否已有相同日期與標題的會議，有則更新，無則新增
+    # 檢查是否已有相同日期與標題的會議，有則以最新版本覆蓋，無則新增
     updated = False
     for i, m in enumerate(all_meetings):
-        if m.get("date") == date_str and m.get("title") == title_str:
+        if m.get("date") == date_str and m.get("title") == clean_title:
             all_meetings[i] = meeting_obj
             updated = True
+            print(f"🔄 偵測到已有 {date_str} {clean_title}，已自動覆蓋更新為最新修訂版{ver_tag}")
             break
     if not updated:
         all_meetings.append(meeting_obj)
@@ -111,7 +122,7 @@ def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
 
     # 6. 推送至 GitHub Pages (第二網站推播部署)
     print("[5/5] 🚀 正在推送至 GitHub 進行線上部署...")
-    commit_msg = f"publish: {date_str} {title_str} (via MeetingPublisher Desktop)"
+    commit_msg = f"publish: {date_str} {clean_title}{ver_tag} (via MeetingPublisher Desktop)"
     try:
         subprocess.run(["git", "add", "data/"], cwd=PROJECT_ROOT, check=True)
         # 檢查是否有更動需要 commit

@@ -138,8 +138,50 @@ def sanitize_pii(text):
     text = re.sub(rf'([1-6]\d{{2}}\s*)({SURNAME_GROUP}[\u4e00-\u9fa5]{{1,2}})(?=\s|$)', mask_name, text)
     return text
 
+def parse_meeting_filename(filename_or_title):
+    """
+    智慧解析檔名或標題中的乾淨會議名稱與版本號：
+    支援：
+      '2026-09-02_擴大行政會議 (4 版).pdf' -> title='擴大行政會議', version='4版'
+      '2026-09-30_擴大行政會議 (2 版)-.pdf' -> title='擴大行政會議', version='2版'
+      '2026-10-25_擴大行政會議 (1版).pdf' -> title='擴大行政會議', version='1版'
+      '擴大行政會議 (4 版)' -> title='擴大行政會議', version='4版'
+    """
+    raw = filename_or_title.strip()
+    raw = re.sub(r'\.pdf$', '', raw, flags=re.IGNORECASE)
+    raw = re.sub(r'[\s\-_\–\~]+$', '', raw)
+    
+    # 移除開頭的日期 (若有)
+    raw = re.sub(r'^\d{4}-\d{2}-\d{2}_', '', raw)
+    
+    # 比對版本號：如 (4 版)、(2 版)-、(1版)、（第3版）、(v2)
+    ver_match = re.search(r'[\(（\[\s_]+(?:第\s*)?(\d+|[vV]\d+)\s*版?[\)）\]\s_\-]*$', raw)
+    if not ver_match:
+        ver_match = re.search(r'[\(（\[](.+?版)[\)）\]]', raw)
+        
+    version = ""
+    clean_title = raw
+    if ver_match:
+        ver_text = ver_match.group(0).strip()
+        num_m = re.search(r'(\d+)', ver_text)
+        if num_m:
+            version = f"{num_m.group(1)}版"
+        else:
+            version = re.sub(r'[\(\)（）\[\]\s\-]', '', ver_text)
+        clean_title = raw[:ver_match.start()].strip()
+        clean_title = re.sub(r'[\s\-_\(（]+$', '', clean_title)
+        
+    return clean_title, version
+
 def enrich_meeting(m):
-    """提取學年度、週次、處室標籤與提煉本次會議各項連結"""
+    """提取學年度、週次、處室標籤、版本號與提煉本次會議各項連結"""
+    # 智慧分離標題與版本號（如 擴大行政會議 (4 版) -> 擴大行政會議 + 4版）
+    raw_title = m.get("title", "")
+    clean_title, version = parse_meeting_filename(raw_title)
+    m["title"] = clean_title
+    if version:
+        m["version"] = version
+
     text = sanitize_pii(m.get("text", ""))
     m["text"] = text
     lines = [l.strip() for l in text.split("\n") if l.strip()]
