@@ -234,10 +234,23 @@ def sanitize_pii(text):
     text = re.sub(rf'([1-6]\d{{2}}\s*)({SURNAME_GROUP}[\u4e00-\u9fa5]{{1,2}})(?=\s|$)', mask_name, text)
     return text
 
+class ParsedMeetingInfo(tuple):
+    def __new__(cls, clean_title, version, is_attachment=False, att_num='', att_desc='', parent_title=''):
+        return super().__new__(cls, (clean_title, version))
+
+    def __init__(self, clean_title, version, is_attachment=False, att_num='', att_desc='', parent_title=''):
+        self.clean_title = clean_title
+        self.version = version
+        self.is_attachment = is_attachment
+        self.att_num = att_num
+        self.att_desc = att_desc
+        self.parent_title = parent_title
+
 def parse_meeting_filename(filename_or_title):
     """
-    智慧解析檔名或標題中的乾淨會議名稱與版本號：
+    智慧解析檔名或標題中的乾淨會議名稱、版本號與附件資訊：
     支援：
+      '教師午會會議紀錄(1版)_附件1＿小學低年級感官奠基與心魂發展指南new' -> 附件1：小學低年級感官奠基與心魂發展指南 (所屬: 教師午會會議紀錄)
       '2026-09-02_擴大行政會議 (4 版).pdf' -> title='擴大行政會議', version='4版'
       '2026-09-30_擴大行政會議 (2 版)-.pdf' -> title='擴大行政會議', version='2版'
       '2026-10-25_擴大行政會議 (1版).pdf' -> title='擴大行政會議', version='1版'
@@ -249,14 +262,29 @@ def parse_meeting_filename(filename_or_title):
     
     # 移除開頭的日期 (若有)
     raw = re.sub(r'^\d{4}-\d{2}-\d{2}_', '', raw)
-    
-    # 比對版本號：如 (4 版)、(2 版)-、(1版)、（第3版）、(v2)
-    ver_match = re.search(r'[\(（\[\s_]+(?:第\s*)?(\d+|[vV]\d+)\s*版?[\)）\]\s_\-]*$', raw)
+
+    is_attachment = False
+    att_num = ''
+    att_desc = ''
+
+    # 檢查是否為附件，例如 _附件1＿小學低年級感官奠基與心魂發展指南new, _附件_預算表, (附件1)
+    att_match = re.search(r'[_＿\- ]*(?:[\(（\[]?\s*附件\s*(\d*)\s*[\)）\]]?)[_＿\- \s]*(.*)$', raw)
+    if att_match and (att_match.start() > 0 or '附件' in raw):
+        is_attachment = True
+        att_num = att_match.group(1).strip()
+        att_desc = att_match.group(2).strip()
+        att_desc = re.sub(r'(?:[_\s\-]*new|\.pdf)+$', '', att_desc, flags=re.IGNORECASE)
+        raw_main = raw[:att_match.start()].strip()
+    else:
+        raw_main = raw
+
+    # 比對主會議名稱之版本號
+    ver_match = re.search(r'[\(（\[\s_]+(?:第\s*)?(\d+|[vV]\d+)\s*版?[\)）\]\s_\-]*$', raw_main)
     if not ver_match:
-        ver_match = re.search(r'[\(（\[](.+?版)[\)）\]]', raw)
+        ver_match = re.search(r'[\(（\[](.+?版)[\)）\]]', raw_main)
         
     version = ""
-    clean_title = raw
+    clean_main_title = raw_main
     if ver_match:
         ver_text = ver_match.group(0).strip()
         num_m = re.search(r'(\d+)', ver_text)
@@ -264,32 +292,45 @@ def parse_meeting_filename(filename_or_title):
             version = f"{num_m.group(1)}版"
         else:
             version = re.sub(r'[\(\)（）\[\]\s\-]', '', ver_text)
-        clean_title = raw[:ver_match.start()].strip()
-        clean_title = re.sub(r'[\s\-_\(（]+$', '', clean_title)
-        
-    return clean_title, version
+        clean_main_title = raw_main[:ver_match.start()].strip()
+        clean_main_title = re.sub(r'[\s\-_\(（]+$', '', clean_main_title)
+
+    if is_attachment:
+        prefix = f"附件{att_num}" if att_num else "附件"
+        full_title = f"{prefix}：{att_desc}" if att_desc else prefix
+        return ParsedMeetingInfo(full_title, version, True, att_num, att_desc, clean_main_title)
+    else:
+        return ParsedMeetingInfo(clean_main_title, version, False, '', '', '')
 
 def enrich_meeting(m):
-    """提取學年度、週次、處室標籤、版本號與提煉本次會議各項連結"""
-    # 智慧分離標題與版本號（如 擴大行政會議 (4 版) -> 擴大行政會議 + 4版）
+    """提取學年度、週次、處室標籤、版本號、附件資訊與提煉本次會議各項連結"""
     raw_title = m.get("title", "")
-    clean_title, version = parse_meeting_filename(raw_title)
-    m["title"] = clean_title
-    if version:
-        m["version"] = version
+    info = parse_meeting_filename(raw_title)
+    m["title"] = info.clean_title
+    if info.version:
+        m["version"] = info.version
+    m["is_attachment"] = info.is_attachment
+    if info.is_attachment:
+        m["attachment_info"] = {
+            "num": info.att_num,
+            "desc": info.att_desc,
+            "label": f"附件{info.att_num}" if info.att_num else "附件",
+            "parent_title": info.parent_title
+        }
 
     text = sanitize_pii(m.get("text", ""))
     m["text"] = text
     lines = [l.strip() for l in text.split("\n") if l.strip()]
     
-    # 處室標籤（僅當該處室確有獨立報告標題時才納入標籤，避免隨意提及誤判）
+    # 處室標籤（僅主會議提取，附件不需處室標籤）
     tags = []
-    for dept in KNOWN_DEPTS:
-        pattern = r'【\s*' + re.escape(dept) + r'\s*】|' + re.escape(dept) + r'報告'
-        if dept == '總務處':
-            pattern += r'|【出納組】|【事務組】|【文書組】'
-        if re.search(pattern, text):
-            tags.append(dept)
+    if not info.is_attachment:
+        for dept in KNOWN_DEPTS:
+            pattern = r'【\s*' + re.escape(dept) + r'\s*】|' + re.escape(dept) + r'報告'
+            if dept == '總務處':
+                pattern += r'|【出納組】|【事務組】|【文書組】'
+            if re.search(pattern, text):
+                tags.append(dept)
     tags = list(dict.fromkeys(tags))
     
     # 學年度與週次
@@ -311,24 +352,25 @@ def enrich_meeting(m):
         academic_year = f"{ay}學年度 {sem}"
 
     # 會議分類（校務會議、備課會議、教師午會等）
-    title = m.get("title", "")
+    # 若為附件，分類依據所屬主會議
+    title_for_cat = info.parent_title if info.is_attachment and info.parent_title else m.get("title", "")
     category = "教師午會"
-    if "校務會議" in title:
+    if "校務會議" in title_for_cat:
         category = "校務會議"
-    elif "備課" in title:
+    elif "備課" in title_for_cat:
         category = "備課會議"
-    elif "行政會議" in title:
+    elif "行政會議" in title_for_cat:
         category = "行政會議"
-    elif "學年會議" in title:
+    elif "學年會議" in title_for_cat:
         category = "學年會議"
-    elif "課發會" in title or "課程發展" in title:
+    elif "課發會" in title_for_cat or "課程發展" in title_for_cat:
         category = "課程發展委員會"
-    elif "特推會" in title or "特殊教育" in title:
+    elif "特推會" in title_for_cat or "特殊教育" in title_for_cat:
         category = "特推會"
-    elif "導師會議" in title:
+    elif "導師會議" in title_for_cat:
         category = "導師會議"
     else:
-        category = re.sub(r'(會議)?(紀錄|記錄)$', '', title).strip() or title or "其他會議"
+        category = re.sub(r'(會議)?(紀錄|記錄)$', '', title_for_cat).strip() or title_for_cat or "其他會議"
 
     m["academic_year"] = academic_year
     m["week"] = week_str
@@ -336,6 +378,49 @@ def enrich_meeting(m):
     m["tags"] = tags
     m["links"] = extract_clean_links(text)
     return m
+
+def link_attachments(meetings):
+    """
+    將同週/同日的附件與主會議記錄進行雙向關聯：
+    1. 主會議記錄取得 attachments 陣列
+    2. 附件取得 parent_id, week 與所屬主會議資訊
+    """
+    main_by_date_cat = {}
+    main_by_date = {}
+
+    for m in meetings:
+        if not m.get("is_attachment"):
+            # 清理先前的 attachments 列表，避免重複堆疊
+            m["attachments"] = []
+            key = (m.get("date"), m.get("category"))
+            main_by_date_cat[key] = m
+            if m.get("date") not in main_by_date:
+                main_by_date[m.get("date")] = m
+
+    for m in meetings:
+        if m.get("is_attachment"):
+            key = (m.get("date"), m.get("category"))
+            parent = main_by_date_cat.get(key) or main_by_date.get(m.get("date"))
+            if parent:
+                m["parent_id"] = parent["id"]
+                m["parent_title"] = parent.get("title", "")
+                if not m.get("week") and parent.get("week"):
+                    m["week"] = parent["week"]
+                if not m.get("academic_year") and parent.get("academic_year"):
+                    m["academic_year"] = parent["academic_year"]
+
+                att_entry = {
+                    "id": m["id"],
+                    "title": m.get("title", ""),
+                    "version": m.get("version", ""),
+                    "label": m.get("attachment_info", {}).get("label", "附件"),
+                    "desc": m.get("attachment_info", {}).get("desc", ""),
+                    "url": m.get("url", "")
+                }
+                if not any(a["id"] == m["id"] for a in parent["attachments"]):
+                    parent["attachments"].append(att_entry)
+
+    return meetings
 
 def optimize_pdf(pdf_path):
     """若有 pypdf 則壓縮重整 PDF 體積"""
@@ -395,6 +480,7 @@ def main():
             if d not in keep_dirs:
                 shutil.rmtree(os.path.join(IMG_BASE_DIR, d), ignore_errors=True)
 
+    enriched_list = link_attachments(enriched_list)
     json.dump(enriched_list, open(idx_path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
     print("同步、圖片抽取與結構化分析完成，共", len(enriched_list), "份會議")
 

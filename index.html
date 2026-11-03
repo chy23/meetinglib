@@ -583,6 +583,181 @@
   .dept-badge.總 { background: #fbf0dc; color: #855314; }
   .dept-badge.輔 { background: #f6e8f4; color: #7d2974; }
 
+  /* 附件導覽項目與層次樣式 */
+  .nav-meeting-wrap {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 4px;
+  }
+  .nav-item-sub {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .nav-has-att-tag {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #6366f1;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    padding: 0 5px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .nav-attachments-sublist {
+    margin-left: 14px;
+    padding-left: 10px;
+    border-left: 2px dashed #cbd5e1;
+    margin-top: 3px;
+    margin-bottom: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .nav-att-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--ink-light);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .nav-att-item:hover {
+    background: #f5f3ff;
+    color: #5b21b6;
+    border-color: #ddd6fe;
+  }
+  .nav-att-item.on {
+    background: #ede9fe !important;
+    border: 1.5px solid #7c3aed !important;
+    color: #5b21b6 !important;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(124, 58, 237, 0.15);
+  }
+  .nav-att-item .nav-att-icon {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .nav-att-item .nav-att-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+  .nav-att-item.on .nav-item-reading-badge {
+    display: inline-flex;
+    background: rgba(124, 58, 237, 0.15);
+    color: #5b21b6;
+    border-color: rgba(124, 58, 237, 0.3);
+  }
+
+  /* 主內容區：會議附件卡片 (主會議中顯示) */
+  .meeting-attachments-box {
+    margin: 14px 0 18px 0;
+    padding: 12px 16px;
+    background: #fbfbfe;
+    border: 1px solid #e0e7ff;
+    border-left: 4px solid #6366f1;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.05);
+  }
+  .mab-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #3730a3;
+    margin-bottom: 8px;
+  }
+  .mab-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .mab-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #ffffff;
+    border: 1px solid #c7d2fe;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #4338ca;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mab-chip:hover {
+    background: #eef2ff;
+    border-color: #818cf8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(99, 102, 241, 0.12);
+  }
+  .mab-chip-btn {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6366f1;
+    background: #e0e7ff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 4px;
+  }
+
+  /* 主內容區：附件模式橫幅 (附件獨立閱覽時顯示) */
+  .attachment-notice-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-radius: 8px;
+  }
+  .anb-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #581c87;
+  }
+  .anb-badge {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    background: #7c3aed;
+    padding: 2px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+  .btn-back-parent {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6d28d9;
+    background: #ffffff;
+    border: 1px solid #c4b5fd;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .btn-back-parent:hover {
+    background: #ede9fe;
+    border-color: #7c3aed;
+  }
+
   /* 主內容區 Main Area */
   main {
     flex: 1;
@@ -1640,10 +1815,10 @@ async function load() {
 
   // 檢查 URL Hash（專屬分享連結）
   const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
-  let target = data.find(m => m.date === hash || m.id === hash);
+  let target = data.find(m => m.id === hash || (m.date === hash && !m.is_attachment)) || data.find(m => m.date === hash);
   if (!target) {
-    // 每次開啟網頁預設開啟最新日期的會議
-    target = data.slice().sort((a, b) => b.date.localeCompare(a.date))[0];
+    // 每次開啟網頁預設開啟最新日期的主會議（優先排除獨立附件）
+    target = data.slice().filter(m => !m.is_attachment).sort((a, b) => b.date.localeCompare(a.date))[0] || data[0];
   }
   cur = target;
 
@@ -1656,7 +1831,7 @@ async function load() {
 window.onhashchange = () => {
   const hash = decodeURIComponent(location.hash.replace(/^#/, ''));
   if (hash && cur && cur.date !== hash && cur.id !== hash) {
-    const target = data.find(m => m.date === hash || m.id === hash);
+    const target = data.find(m => m.id === hash || (m.date === hash && !m.is_attachment)) || data.find(m => m.date === hash);
     if (target) show(target.id, null, false);
   }
 };
@@ -1674,7 +1849,7 @@ document.querySelectorAll('.filter-pill').forEach(pill => {
 // 辨識會議類別
 function getMeetingCategory(m) {
   const cat = (m.category || '').trim();
-  const t = (m.title || '').trim();
+  const t = (m.parent_title || m.title || '').trim();
   const name = cat || t;
   if (/校務會議/.test(name)) return { name: '校務會議', icon: '🏛️' };
   if (/備課/.test(name)) return { name: '備課會議', icon: '📚' };
@@ -1731,46 +1906,77 @@ function renderNav() {
     let subHtml = '';
     let subIndex = 0;
     for (const [catName, catData] of Object.entries(subCategories)) {
+      // 區分主會議與附件，附件不佔據頂層會議數量
+      const mainMeetings = catData.items.filter(m => !m.is_attachment);
+      const orphanAttachments = catData.items.filter(m => m.is_attachment && !m.parent_id);
+      const displayMeetings = [...mainMeetings, ...orphanAttachments];
+      const totalAttCount = catData.items.filter(m => m.is_attachment).length;
+
       // 預設收合！只有包含目前正在閱覽會議 (cur) 的子項目才展開；其餘子項目預設折疊收合！
       const hasCurSub = cur && catData.items.some(m => m.id === cur.id);
       const isSubOpen = hasCurSub || (!cur && groupIndex === 0 && subIndex === 0);
       subIndex++;
+
+      const countBadge = `${mainMeetings.length} 份${totalAttCount ? ` · ${totalAttCount} 附件` : ''}`;
 
       subHtml += `
         <div class="sub-group ${isSubOpen ? '' : 'collapsed'}" data-category="${esc(catName)}">
           <div class="sub-group-header" onclick="toggleSubGroup(this)">
             <span class="sub-group-title">${catData.icon} ${esc(catName)}</span>
             <div style="display:flex;align-items:center;gap:6px">
-              <span class="sub-group-count">${catData.items.length} 份</span>
+              <span class="sub-group-count">${countBadge}</span>
               <span class="chevron">▼</span>
             </div>
           </div>
           <div class="sub-group-list">
-            ${catData.items.map(m => `
-              <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
-                <div class="nav-item-top">
-                  <span class="nav-item-title">${esc(m.title)}${m.version ? `<span class="version-badge">${esc(m.version)}</span>` : ''}<span class="nav-item-reading-badge">📍 閱覽中</span></span>
-                  ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
-                </div>
-                <span class="nav-item-date">📅 ${m.date}</span>
-                ${m.tags && m.tags.length ? `
-                  <div class="nav-item-badges">
-                    ${m.tags.slice(0, 4).map(t => `<span class="dept-badge ${t[0]}">${t.slice(0, 2)}</span>`).join('')}
+            ${displayMeetings.map(m => `
+              <div class="nav-meeting-wrap">
+                <a class="nav-item ${cur && cur.id === m.id ? 'on' : ''}" data-id="${m.id}" onclick="show('${m.id}')">
+                  <div class="nav-item-top">
+                    <span class="nav-item-title">${m.is_attachment ? '<span style="color:#7c3aed;margin-right:2px">📎</span>' : ''}${esc(m.title)}${m.version ? `<span class="version-badge">${esc(m.version)}</span>` : ''}<span class="nav-item-reading-badge">📍 閱覽中</span></span>
+                    ${m.week ? `<span class="nav-item-week">${esc(m.week)}</span>` : ''}
+                  </div>
+                  <div class="nav-item-sub">
+                    <span class="nav-item-date">📅 ${m.date}</span>
+                    ${m.attachments && m.attachments.length ? `
+                      <span class="nav-has-att-tag">📎 ${m.attachments.length} 份附件</span>
+                    ` : ''}
+                  </div>
+                  ${m.tags && m.tags.length ? `
+                    <div class="nav-item-badges">
+                      ${m.tags.slice(0, 4).map(t => `<span class="dept-badge ${t[0]}">${t.slice(0, 2)}</span>`).join('')}
+                    </div>
+                  ` : ''}
+                </a>
+                ${m.attachments && m.attachments.length ? `
+                  <div class="nav-attachments-sublist">
+                    ${m.attachments.map(att => `
+                      <a class="nav-att-item ${cur && cur.id === att.id ? 'on' : ''}" data-id="${att.id}" onclick="event.stopPropagation(); show('${att.id}')" title="${esc(att.title)}">
+                        <span class="nav-att-icon">📎</span>
+                        <span class="nav-att-title">${esc(att.title)}</span>
+                        ${att.version ? `<span class="version-badge">${esc(att.version)}</span>` : ''}
+                        <span class="nav-item-reading-badge">📍 閱覽中</span>
+                      </a>
+                    `).join('')}
                   </div>
                 ` : ''}
-              </a>
+              </div>
             `).join('')}
           </div>
         </div>
       `;
     }
 
+    const mainInGroup = items.filter(m => !m.is_attachment).length;
+    const attInGroup = items.filter(m => m.is_attachment).length;
+    const groupCountBadge = `${mainInGroup} 份${attInGroup ? ` · ${attInGroup} 附件` : ''}`;
+
     html += `
       <div class="nav-group ${isGroupOpen ? '' : 'collapsed'}" data-group="${esc(groupName)}">
         <div class="group-header" onclick="toggleNavGroup(this)">
           <span>📁 ${esc(groupName)}</span>
           <div style="display:flex;align-items:center;gap:6px">
-            <span class="group-count">${items.length} 份</span>
+            <span class="group-count">${groupCountBadge}</span>
             <span class="chevron">▼</span>
           </div>
         </div>
@@ -1827,7 +2033,7 @@ async function show(id, kw = null, updateHash = true) {
   if (!cur) return;
 
   if (updateHash) {
-    location.hash = '#' + cur.date;
+    location.hash = '#' + (cur.is_attachment ? cur.id : cur.date);
   }
 
   // 關閉手機抽屜
@@ -1836,17 +2042,52 @@ async function show(id, kw = null, updateHash = true) {
   // 動態更新頁面標題（保留清晰會議名稱，絕不殘留尾隨橫線破折號）
   const meetingTitle = cur.title || '會議紀錄';
   const meetingWeek = cur.week ? ` (${cur.week})` : '';
-  document.title = `${meetingTitle}${meetingWeek} ｜ 📚 會議資料庫`;
+  const prefix = cur.is_attachment ? '📎 附件: ' : '';
+  document.title = `${prefix}${meetingTitle}${meetingWeek} ｜ 📚 會議資料庫`;
 
   // 選單標籤高亮與展開對應的學期與會議項目子目錄
-  document.querySelectorAll('.nav-item').forEach(a => a.classList.toggle('on', a.dataset.id === id));
-  const activeItem = document.querySelector(`.nav-item[data-id="${id}"]`);
+  document.querySelectorAll('.nav-item, .nav-att-item').forEach(a => a.classList.toggle('on', a.dataset.id === id));
+  const activeItem = document.querySelector(`.nav-item[data-id="${id}"], .nav-att-item[data-id="${id}"]`);
   if (activeItem) {
     const parentSub = activeItem.closest('.sub-group');
     if (parentSub) parentSub.classList.remove('collapsed');
     const parentGroup = activeItem.closest('.nav-group');
     if (parentGroup) parentGroup.classList.remove('collapsed');
   }
+
+  // 附件模式橫幅 (若當前為附件獨立閱覽)
+  const attachmentBanner = cur.is_attachment ? `
+    <div class="attachment-notice-banner">
+      <div class="anb-left">
+        <span class="anb-badge">📎 會議補充附件</span>
+        <span>所屬主會議：<strong>${esc(cur.parent_title || cur.category)}</strong>${cur.week ? `（${esc(cur.week)}）` : ''} · 📅 ${cur.date}</span>
+      </div>
+      ${cur.parent_id ? `
+        <button class="btn-back-parent" onclick="show('${cur.parent_id}')" title="回到本次會議記錄">
+          📋 回到主會議記錄 ➔
+        </button>
+      ` : ''}
+    </div>
+  ` : '';
+
+  // 主會議中顯示的附件卡片 (若主會議附有附件)
+  const meetingAttachmentsCard = (!cur.is_attachment && cur.attachments && cur.attachments.length > 0) ? `
+    <div class="meeting-attachments-box" id="meetingAttachmentsBox">
+      <div class="mab-header">
+        <span class="mab-title">📎 本次會議相關附件（共 ${cur.attachments.length} 份，點擊即可切換閱覽）：</span>
+      </div>
+      <div class="mab-chips">
+        ${cur.attachments.map(att => `
+          <div class="mab-chip" onclick="show('${att.id}')" title="點擊閱覽此附件內容">
+            <span class="mab-chip-icon">📄</span>
+            <span class="mab-chip-name">${esc(att.title)}</span>
+            ${att.version ? `<span class="version-badge">${esc(att.version)}</span>` : ''}
+            <span class="mab-chip-btn">閱覽附件 ➔</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  ` : '';
 
   // 組合本次會議各項連結卡片 (Links Card)
   let linksHtml = '';
@@ -1895,6 +2136,9 @@ async function show(id, kw = null, updateHash = true) {
   const deptPills = (cur.tags && cur.tags.length)
     ? cur.tags.map(t => `<div class="dept-jump-pill" onclick="jumpToDept('${t}')">${t}</div>`).join('')
     : '';
+  const attPill = (!cur.is_attachment && cur.attachments && cur.attachments.length > 0)
+    ? `<div class="dept-jump-pill pill-link" onclick="document.getElementById('meetingAttachmentsBox')?.scrollIntoView({behavior:'smooth'})">📎 相關附件 (${cur.attachments.length})</div>`
+    : '';
   const linksPill = (cur.links && cur.links.length > 0)
     ? `<div class="dept-jump-pill pill-link" onclick="jumpToLinks()">🔗 本次會議之各項連結</div>`
     : '';
@@ -1905,6 +2149,7 @@ async function show(id, kw = null, updateHash = true) {
     <div class="dept-jump-bar">
       <span>📍 處室快速跳轉：</span>
       ${deptPills}
+      ${attPill}
       ${linksPill}
       ${topPill}
       ${bottomPill}
@@ -1914,14 +2159,15 @@ async function show(id, kw = null, updateHash = true) {
   // 建立主卡片
   $('main').innerHTML = `
     <div class="doc" style="max-width:${Math.round(960 * currentZoom)}px">
+      ${attachmentBanner}
       <div class="doc-header">
         <div class="doc-title-row">
           <div>
-            <h2>${esc(cur.title)}${cur.version ? `<span class="doc-version-badge">${esc(cur.version)}</span>` : ''}</h2>
+            <h2>${cur.is_attachment ? '<span style="color:#7c3aed;margin-right:6px;">📎</span>' : ''}${esc(cur.title)}${cur.version ? `<span class="doc-version-badge">${esc(cur.version)}</span>` : ''}</h2>
             <div class="doc-meta">
               <span class="meta-tag">📅 ${cur.date}</span>
               ${cur.academic_year ? `<span class="meta-tag">🎓 ${esc(cur.academic_year)}</span>` : ''}
-              ${cur.week ? `<span class="meta-tag">📌 ${esc(cur.week)}</span>` : ''}
+              ${cur.week ? `<span class="meta-tag">📌 ${esc(cur.week)}${cur.is_attachment ? ' 附件' : ''}</span>` : ''}
             </div>
           </div>
         </div>
@@ -1933,6 +2179,7 @@ async function show(id, kw = null, updateHash = true) {
         </div>
       </div>
 
+      ${meetingAttachmentsCard}
       ${linksHtml}
       ${deptTagsHtml}
 
@@ -2462,8 +2709,8 @@ searchInput.addEventListener('input', e => {
       ${hits.length ? hits.map(h => `
         <div class="hit" onclick="show('${h.m.id}', ${esc(JSON.stringify(kw))})">
           <div class="hit-title-row">
-            <span class="hit-title">${hl(h.m.title)}</span>
-            <span class="tag">📅 ${h.m.date} · ${h.count} 處符合</span>
+            <span class="hit-title">${h.m.is_attachment ? '<span style="color:#7c3aed;margin-right:4px;">📎</span>' : ''}${hl(h.m.title)}</span>
+            <span class="tag">${h.m.is_attachment ? '📎 會議附件 · ' : ''}📅 ${h.m.date} · ${h.count} 處符合</span>
           </div>
           ${h.snippets.map(snip => `<p>…${hl(snip)}…</p>`).join('')}
         </div>

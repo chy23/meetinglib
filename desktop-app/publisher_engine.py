@@ -30,7 +30,8 @@ from sync import (
     enrich_meeting,
     clean_url,
     get_domain,
-    parse_meeting_filename
+    parse_meeting_filename,
+    link_attachments
 )
 
 def generate_file_id(date_str, title_str):
@@ -112,8 +113,9 @@ def publish_meeting(pdf_path, date_str, title_str, raw_text, gdrive_dir=None):
     if not updated:
         all_meetings.append(meeting_obj)
 
-    # 依日期遞減排序（最新置頂）
+    # 依日期遞減排序（最新置頂）並自動關聯主會議與附件
     all_meetings.sort(key=lambda x: x.get("date", ""), reverse=True)
+    all_meetings = link_attachments(all_meetings)
 
     with open(INDEX_PATH, "w", encoding="utf-8") as f:
         json.dump(all_meetings, f, ensure_ascii=False, indent=2)
